@@ -899,8 +899,8 @@ void update_error(struct model_struct * model, int i, int j){
 			ddot_w(model->data.n,me(model,i,j)->resid_vec,me(model,i,j)->resid_vec,&U);
 			U = U - me(model,i,j)->v_sums_correct;
 			U = U/nd;
-			me(model,i,j)->sigma_e = U;
-      //me(model,i,j)->sigma_e = 1.0;
+			//me(model,i,j)->sigma_e = U;
+      me(model,i,j)->sigma_e = 1.0;
                         //Rprintf("no segfault\n");
 			if(!R_FINITE(U)){
 				free_model(model);
