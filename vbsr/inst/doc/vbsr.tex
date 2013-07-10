@@ -1,0 +1,243 @@
+\documentclass[a4paper]{article}
+\usepackage{graphicx}
+
+\title{vbsr: Variational Bayes Spike regression}
+\author{Ben Logsdon}
+
+\usepackage{Sweave}
+\begin{document}
+
+\maketitle
+\section{Example 1}
+We first consider the case of uncorrelated features, and a linear response, with a sparse true model:
+
+\begin{Schunk}
+\begin{Sinput}
+> library(vbsr)
+> library(MASS)
+> set.seed(1)
+> n <- 100
+> m <- 500
+> ntrue <- 10
+> e <- rnorm(n)
+> X <- matrix(rnorm(n * m), n, m)
+> tbeta <- sample(1:m, ntrue)
+> beta <- rep(0, m)
+> beta[tbeta] <- rnorm(ntrue, 0, 2)
+> y <- X %*% beta + e
+> res <- vbsr_net(y, X, regress = "LINEAR")
+\end{Sinput}
+\begin{Soutput}
+[1] 100 501
+Initializing marginal analysis...
+Sum of squares pre-compute...
+Initialized marginal model...
+Model run...
+Initializing model...
+Scaling...
+Initialized model...
+Model run...
+Results computed..
+\end{Soutput}
+\end{Schunk}
+
+Next we look at the following solutions along the path of the penalty parameter for this, starting with the normally distributed test statistic:
+\begin{center}
+\setkeys{Gin}{width=3 in}
+\begin{Schunk}
+\begin{Sinput}
+> plot_vbsr_beta_chi(res)
+\end{Sinput}
+\end{Schunk}
+\includegraphics{vbsr-002}
+\end{center}
+The expectation of the regression coefficients:
+\begin{center}
+\setkeys{Gin}{width=3 in}
+\begin{Schunk}
+\begin{Sinput}
+> plot_vbsr_e_beta(res)
+\end{Sinput}
+\end{Schunk}
+\includegraphics{vbsr-003}
+\end{center}
+as well as the posterior probability of being non-zero:
+\begin{center}
+\setkeys{Gin}{width=3 in}
+\begin{Schunk}
+\begin{Sinput}
+> plot_vbsr_beta_p(res)
+\end{Sinput}
+\end{Schunk}
+\includegraphics{vbsr-004}
+\end{center}
+the Kullback-Leibler divergence computed along the path:
+\begin{center}
+\setkeys{Gin}{width=3 in}
+\begin{Schunk}
+\begin{Sinput}
+> plot_vbsr_kl(res)
+\end{Sinput}
+\end{Schunk}
+\includegraphics{vbsr-005}
+\end{center}
+and finally another diagnostic of the goodness of fit of the null features to a normal distribution along the path:
+\begin{center}
+\setkeys{Gin}{width=3 in}
+\begin{Schunk}
+\begin{Sinput}
+> plot_vbsr_boxplot(res)
+\end{Sinput}
+\end{Schunk}
+\includegraphics{vbsr-006}
+\end{center}
+Let's look at what the solution at the KL minimum plus 2 standard errors looks like:
+\begin{Schunk}
+\begin{Sinput}
+> w_sol = which.min(abs(res$kl - res$kl_min - 2 * res$kl_se))
+> res$l0_path[w_sol]
+\end{Sinput}
+\begin{Soutput}
+[1] -9.296557
+\end{Soutput}
+\begin{Sinput}
+> print(sort(tbeta))
+\end{Sinput}
+\begin{Soutput}
+ [1]  12  38  77  92 126 183 286 396 427 494
+\end{Soutput}
+\begin{Sinput}
+> which(res$beta_p[-1, w_sol] > 0.99)
+\end{Sinput}
+\begin{Soutput}
+[1]  12  38  77 126 286 427 494
+\end{Soutput}
+\begin{Sinput}
+> which(res$beta_chi[-1, w_sol]^2 > qchisq(1 - 0.05/1000, 1))
+\end{Sinput}
+\begin{Soutput}
+[1]  12  38  77  92 126 286 427 494
+\end{Soutput}
+\end{Schunk}
+
+
+
+
+\section{Example 2}
+We consider the case of uncorrelated features, and a logistic response, with a sparse true model:
+
+\begin{Schunk}
+\begin{Sinput}
+> n = 200
+> m = 50
+> ntrue = 10
+> X <- matrix(rnorm(n * m), n, m)
+> tbeta <- sample(1:m, ntrue)
+> beta <- rep(0, m)
+> beta[tbeta] <- rnorm(ntrue, 0, 1)
+> pred_val <- X %*% beta
+> y <- rep(0, n)
+> for (i in 1:n) {
++     y[i] <- rbinom(1, 1, 1/(1 + exp(-pred_val[i])))
++ }
+> res <- vbsr_net(y, X, regress = "LOGISTIC", n_orderings = 1, 
++     path_length = 50)
+\end{Sinput}
+\begin{Soutput}
+[1] 200  51
+Initializing marginal analysis...
+Sum of squares pre-compute...
+Initialized marginal model...
+Model run...
+Initializing model...
+Scaling...
+Initialized model...
+Model run...
+Results computed..
+\end{Soutput}
+\end{Schunk}
+
+Next we look at the following solutions along the path of the penalty parameter for this, starting with the normally distributed test statistic:
+\begin{center}
+\setkeys{Gin}{width=3 in}
+\begin{Schunk}
+\begin{Sinput}
+> plot_vbsr_beta_chi(res)
+\end{Sinput}
+\end{Schunk}
+\includegraphics{vbsr-009}
+\end{center}
+The expectation of the regression coefficients:
+\begin{center}
+\setkeys{Gin}{width=3 in}
+\begin{Schunk}
+\begin{Sinput}
+> plot_vbsr_e_beta(res)
+\end{Sinput}
+\end{Schunk}
+\includegraphics{vbsr-010}
+\end{center}
+as well as the posterior probability of being non-zero:
+\begin{center}
+\setkeys{Gin}{width=3 in}
+\begin{Schunk}
+\begin{Sinput}
+> plot_vbsr_beta_p(res)
+\end{Sinput}
+\end{Schunk}
+\includegraphics{vbsr-011}
+\end{center}
+the Kullback-Leibler divergence computed along the path:
+\begin{center}
+\setkeys{Gin}{width=3 in}
+\begin{Schunk}
+\begin{Sinput}
+> plot_vbsr_kl(res)
+\end{Sinput}
+\end{Schunk}
+\includegraphics{vbsr-012}
+\end{center}
+and finally another diagnostic of the goodness of fit of the null features to a normal distribution along the path:
+\begin{center}
+\setkeys{Gin}{width=3 in}
+\begin{Schunk}
+\begin{Sinput}
+> plot_vbsr_boxplot(res)
+\end{Sinput}
+\end{Schunk}
+\includegraphics{vbsr-013}
+\end{center}
+Let's look at what the solution at the KL minimum plus 2 standard errors looks like:
+\begin{Schunk}
+\begin{Sinput}
+> w_sol = which.min(abs(res$kl - res$kl_min - 2 * res$kl_se))
+> res$l0_path[w_sol]
+\end{Sinput}
+\begin{Soutput}
+[1] -22.87079
+\end{Soutput}
+\begin{Sinput}
+> print(sort(tbeta))
+\end{Sinput}
+\begin{Soutput}
+ [1]  6  7  9 14 17 18 19 23 24 34
+\end{Soutput}
+\begin{Sinput}
+> which(res$beta_p[-1, w_sol] > 0.99)
+\end{Sinput}
+\begin{Soutput}
+[1] 18 34
+\end{Soutput}
+\begin{Sinput}
+> which(res$beta_chi[-1, w_sol]^2 > qchisq(1 - 0.05/1000, 1))
+\end{Sinput}
+\begin{Soutput}
+[1] 17 18 34
+\end{Soutput}
+\end{Schunk}
+
+
+
+\end{document}
+
+
