@@ -681,11 +681,11 @@ void update_beta(struct model_struct * model, int i, int j){
 
 				me(model,i,j)->p_sums = me(model,i,j)->p_sums + p;
 				if(p>1-1e-10){
-					me(model,i,j)->entropy = me(model,i,j)->entropy - p*log(p) + (1-p) + 0.5*p*log(2*3.14159*sigma);
+					me(model,i,j)->entropy = me(model,i,j)->entropy - p*log(p) + (1-p) + 0.5*p*log(2*exp(1)*3.14159*sigma);
 				}else if(p<1e-10){
-					me(model,i,j)->entropy = me(model,i,j)->entropy + p - (1-p)*log(1-p) + 0.5*p*log(2*3.14159*sigma);					
+					me(model,i,j)->entropy = me(model,i,j)->entropy + p - (1-p)*log(1-p) + 0.5*p*log(2*exp(1)*3.14159*sigma);					
 				} else {
-					me(model,i,j)->entropy = me(model,i,j)->entropy - p*log(p) - (1-p)*log(1-p) + 0.5*p*log(2*3.14159*sigma);
+					me(model,i,j)->entropy = me(model,i,j)->entropy - p*log(p) - (1-p)*log(1-p) + 0.5*p*log(2*exp(1)*3.14159*sigma);
 				}
 				me(model,i,j)->v_sums_correct = me(model,i,j)->v_sums_correct + (pow(e_b,2)-e_b2)*(model->data.x_sum_sq[k]);
 					
@@ -739,11 +739,11 @@ void update_beta(struct model_struct * model, int i, int j){
 
 				me(model,i,j)->p_sums = me(model,i,j)->p_sums + p;
 				if(p>1-1e-10){
-					me(model,i,j)->entropy = me(model,i,j)->entropy - p*log(p) + (1-p) + 0.5*p*log(2*3.14159*sigma);
+					me(model,i,j)->entropy = me(model,i,j)->entropy - p*log(p) + (1-p) + 0.5*p*log(2*exp(1)*3.14159*sigma);
 				}else if(p<1e-10){
-					me(model,i,j)->entropy = me(model,i,j)->entropy + p - (1-p)*log(1-p) + 0.5*p*log(2*3.14159*sigma);					
+					me(model,i,j)->entropy = me(model,i,j)->entropy + p - (1-p)*log(1-p) + 0.5*p*log(2*exp(1)*3.14159*sigma);					
 				} else {
-					me(model,i,j)->entropy = me(model,i,j)->entropy - p*log(p) - (1-p)*log(1-p) + 0.5*p*log(2*3.14159*sigma);
+					me(model,i,j)->entropy = me(model,i,j)->entropy - p*log(p) - (1-p)*log(1-p) + 0.5*p*log(2*exp(1)*3.14159*sigma);
 				}
 				//me(model,i,j)->v_sums_correct = me(model,i,j)->v_sums_correct + (pow(e_b,2)-e_b2)*(model->data.x_sum_sq[k]);
 					
