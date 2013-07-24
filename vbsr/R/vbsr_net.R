@@ -14,6 +14,7 @@ vbsr_net = function(y,
 		bma_approximation = TRUE,
 		screen = 1.0,
 		already_screened = 1.0,
+    bonf_l0=TRUE,
 		kl = 0.99,
 		l0_path=NULL,
 		n_threads=NULL){
@@ -24,7 +25,10 @@ vbsr_net = function(y,
 		X <- cbind(rep(1,n),X);
 		m <- m+1;
 	}
-
+  if(bonf_l0){
+    path_length=1;
+    l0_path=-(qchisq(0.05/m,1,lower.tail=FALSE)-log(n));
+  }
 	#n <- nrow(X);
 
 	#m <- ncol(X);
@@ -509,6 +513,10 @@ vbsr_net = function(y,
 			result_list$kl_index <- b_list;
 
 		}
-	}		
+	}	
+  if(bonf_l0){
+    result_list$beta <- result_list$e_beta[-wexc];
+    result_list$z <- result_list$beta_chi[-wexc];
+  }
 	return(result_list);
 }

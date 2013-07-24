@@ -5,7 +5,7 @@ Version: 0.0.2
 Date: 2013-07-10
 Author: Benjamin Logsdon
 Maintainer: Benjamin Logsdon <blogsdon@uw.edu>
-Depends: Matrix, utils
+Depends: R (>= 2.12.0)
 Description: Efficient algorithm for solving ultra-sparse
 		regularized regression models using a variational
 		Bayes algorithm with a spike (l0) prior.  Algorithm
@@ -15,4 +15,4 @@ Description: Efficient algorithm for solving ultra-sparse
 		error included in this package.
 License: GPL-2
 Copyright: Benjamin Logsdon 2013
-Depends: R (>= 2.12.0)
+Packaged: 2013-07-24 04:06:01 UTC; aeberhart

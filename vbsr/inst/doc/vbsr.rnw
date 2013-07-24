@@ -5,6 +5,7 @@
 \author{Ben Logsdon}
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 
 \maketitle
 \section{Example 1}
@@ -31,45 +32,49 @@ Next we look at the following solutions along the path of the penalty parameter 
 \begin{center}
 \setkeys{Gin}{width=3 in}
 <<fig=TRUE>>=
-plot_vbsr_beta_chi(res)
+#plot_vbsr_beta_chi(res)
+plot(res$beta_chi[-1])
 @
 \end{center}
 The expectation of the regression coefficients:
 \begin{center}
 \setkeys{Gin}{width=3 in}
 <<fig=TRUE>>=
-plot_vbsr_e_beta(res)
+#plot_vbsr_e_beta(res)
+plot(res$e_beta[-1])
 @
 \end{center}
 as well as the posterior probability of being non-zero:
 \begin{center}
 \setkeys{Gin}{width=3 in}
 <<fig=TRUE>>=
-plot_vbsr_beta_p(res)
+#plot_vbsr_beta_p(res)
+plot(res$beta_p[-1])
 @
 \end{center}
-the Kullback-Leibler divergence computed along the path:
-\begin{center}
-\setkeys{Gin}{width=3 in}
-<<fig=TRUE>>=
-plot_vbsr_kl(res)
-@
-\end{center}
-and finally another diagnostic of the goodness of fit of the null features to a normal distribution along the path:
-\begin{center}
-\setkeys{Gin}{width=3 in}
-<<fig=TRUE>>=
-plot_vbsr_boxplot(res)
-@
-\end{center}
-Let's look at what the solution at the KL minimum plus 2 standard errors looks like:
-<<>>=
-w_sol = which.min(abs(res$kl-res$kl_min-2*res$kl_se))
-res$l0_path[w_sol];
-print(sort(tbeta));
-which(res$beta_p[-1,w_sol]>.99)
-which(res$beta_chi[-1,w_sol]^2 > qchisq(1-0.05/1000,1))
-@
+%the Kullback-Leibler divergence computed along the path:
+%\begin{center}
+%\setkeys{Gin}{width=3 in}
+%#<<fig=TRUE>>=
+%#plot_vbsr_kl(res)
+
+%#@
+%\end{center}
+%and finally another diagnostic of the goodness of fit of the null features to a normal distribution along the path:
+%\begin{center}
+%\setkeys{Gin}{width=3 in}
+%<<fig=TRUE>>=
+%plot_vbsr_boxplot(res)
+%@
+%\end{center}
+%Let's look at what the solution at the KL minimum plus 2 standard errors looks like:
+%<<>>=
+%w_sol = which.min(abs(res$kl-res$kl_min-2*res$kl_se))
+%res$l0_path[w_sol];
+%print(sort(tbeta));
+%which(res$beta_p[-1,w_sol]>.99)
+%which(res$beta_chi[-1,w_sol]^2 > qchisq(1-0.05/1000,1))
+%@
 
 
 
@@ -97,45 +102,48 @@ Next we look at the following solutions along the path of the penalty parameter 
 \begin{center}
 \setkeys{Gin}{width=3 in}
 <<fig=TRUE>>=
-plot_vbsr_beta_chi(res)
+#plot_vbsr_beta_chi(res)
+plot(res$beta_chi[-1])
 @
 \end{center}
 The expectation of the regression coefficients:
 \begin{center}
 \setkeys{Gin}{width=3 in}
 <<fig=TRUE>>=
-plot_vbsr_e_beta(res)
+#plot_vbsr_e_beta(res)
+plot(res$e_beta[-1])
 @
 \end{center}
 as well as the posterior probability of being non-zero:
 \begin{center}
 \setkeys{Gin}{width=3 in}
 <<fig=TRUE>>=
-plot_vbsr_beta_p(res)
+#plot_vbsr_beta_p(res)
+plot(res$beta_p[-1])
 @
 \end{center}
-the Kullback-Leibler divergence computed along the path:
-\begin{center}
-\setkeys{Gin}{width=3 in}
-<<fig=TRUE>>=
-plot_vbsr_kl(res)
-@
-\end{center}
-and finally another diagnostic of the goodness of fit of the null features to a normal distribution along the path:
-\begin{center}
-\setkeys{Gin}{width=3 in}
-<<fig=TRUE>>=
-plot_vbsr_boxplot(res)
-@
-\end{center}
-Let's look at what the solution at the KL minimum plus 2 standard errors looks like:
-<<>>=
-w_sol = which.min(abs(res$kl-res$kl_min-2*res$kl_se))
-res$l0_path[w_sol];
-print(sort(tbeta));
-which(res$beta_p[-1,w_sol]>.99)
-which(res$beta_chi[-1,w_sol]^2 > qchisq(1-0.05/100,1))
-@
+%the Kullback-Leibler divergence computed along the path:
+%\begin{center}
+%\setkeys{Gin}{width=3 in}
+%<<fig=TRUE>>=
+%plot_vbsr_kl(res)
+%@
+%\end{center}
+%and finally another diagnostic of the goodness of fit of the null features to a normal distribution along the path:
+%\begin{center}
+%\setkeys{Gin}{width=3 in}
+%<<fig=TRUE>>=
+%plot_vbsr_boxplot(res)
+%@
+%\end{center}
+%Let's look at what the solution at the KL minimum plus 2 standard errors looks like:
+%<<>>=
+%w_sol = which.min(abs(res$kl-res$kl_min-2*res$kl_se))
+%res$l0_path[w_sol];
+%print(sort(tbeta));
+%which(res$beta_p[-1,w_sol]>.99)
+%which(res$beta_chi[-1,w_sol]^2 > qchisq(1-0.05/100,1))
+%@
 
 \section{Example 3}
 Now consider the case of weakly correlated features, and a linear response, with a sparse true model:
@@ -163,44 +171,47 @@ Next we look at the following solutions along the path of the penalty parameter 
 \begin{center}
 \setkeys{Gin}{width=3 in}
 <<fig=TRUE>>=
-plot_vbsr_beta_chi(res)
+#plot_vbsr_beta_chi(res)
+plot(res$beta_chi[-1])
 @
 \end{center}
 The expectation of the regression coefficients:
 \begin{center}
 \setkeys{Gin}{width=3 in}
 <<fig=TRUE>>=
-plot_vbsr_e_beta(res)
+#plot_vbsr_e_beta(res)
+plot(res$e_beta[-1])
 @
 \end{center}
 as well as the posterior probability of being non-zero:
 \begin{center}
 \setkeys{Gin}{width=3 in}
 <<fig=TRUE>>=
-plot_vbsr_beta_p(res)
+#plot_vbsr_beta_p(res)
+plot(res$beta_p[-1])
 @
 \end{center}
-the Kullback-Leibler divergence computed along the path:
-\begin{center}
-\setkeys{Gin}{width=3 in}
-<<fig=TRUE>>=
-plot_vbsr_kl(res)
-@
-\end{center}
-and finally another diagnostic of the goodness of fit of the null features to a normal distribution along the path:
-\begin{center}
-\setkeys{Gin}{width=3 in}
-<<fig=TRUE>>=
-plot_vbsr_boxplot(res)
-@
-\end{center}
+%the Kullback-Leibler divergence computed along the path:
+%\begin{center}
+%\setkeys{Gin}{width=3 in}
+%<<fig=TRUE>>=
+%plot_vbsr_kl(res)
+%@
+%\end{center}
+%and finally another diagnostic of the goodness of fit of the null features to a normal distribution along the path:
+%\begin{center}
+%\setkeys{Gin}{width=3 in}
+%<<fig=TRUE>>=
+%plot_vbsr_boxplot(res)
+%@
+%\end{center}
 Let's look at what the solution at the end of the path looks like:
 <<>>=
-w_sol2=which.min(abs(res$kl-res$kl_min));
-res$l0_path[w_sol2];
+#w_sol2=which.min(abs(res$kl-res$kl_min));
+#res$l0_path[w_sol2];
 print(sort(tbeta));
-which(res$beta_p[-1,w_sol2]>.99)
-which(res$beta_chi[-1,w_sol2]^2 > qchisq(1-0.05/1000,1))
+which(res$beta_p[-1]>.99)
+which(res$beta_chi[-1]^2 > qchisq(1-0.05/1000,1))
 which(res$sma_chi[-res$which_excluded]^2 > qchisq(1-0.05/1000,1))
 @
 

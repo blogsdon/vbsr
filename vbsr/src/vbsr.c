@@ -1,5 +1,5 @@
 //variational Bayes spike regression (vbsr) R package C library
-//Copyright 2012 Benjamin A Logsdon
+//Copyright 2013 Benjamin A Logsdon
 #include "vbsr.h"
 
 
@@ -1015,7 +1015,7 @@ void update_lb(struct model_struct * model, int i, int j){
       ddot_w(model->data.n,me(model,i,j)->resid_vec,me(model,i,j)->resid_vec,&U);
 			U = U - me(model,i,j)->v_sums_correct;
 
-			lba = -0.5*nd*(log(2*3.14159*me(model,i,j)->sigma_e)+U);
+			lba = -0.5*nd*(log(2*3.14159*me(model,i,j)->sigma_e)+(U/nd));
 			lba = lba + log(p_beta)*(me(model,i,j)->p_sums);
 			lba = lba + log(1-p_beta)*(md - me(model,i,j)->p_sums);
 			lba = lba + me(model,i,j)->entropy;
