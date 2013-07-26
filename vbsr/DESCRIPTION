@@ -1,0 +1,18 @@
+Package: vbsr
+Type: Package
+Title: Variational Bayes Spike Regression Regularized Linear Models
+Version: 0.0.2
+Date: 2013-07-10
+Author: Benjamin Logsdon
+Maintainer: Benjamin Logsdon <blogsdon@uw.edu>
+Depends: R (>= 2.12.0)
+Description: Efficient algorithm for solving ultra-sparse
+		regularized regression models using a variational
+		Bayes algorithm with a spike (l0) prior.  Algorithm
+		is solved on a path, with coordinate updates, and is
+		capable of generating very sparse models.  There are
+		very general model diagnostics for controling type-1
+		error included in this package.
+License: GPL-2
+Copyright: Benjamin Logsdon 2013
+Packaged: 2013-07-24 04:06:01 UTC; aeberhart
