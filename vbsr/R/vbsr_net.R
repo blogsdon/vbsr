@@ -25,7 +25,7 @@ vbsr_net = function(y,
 		X <- cbind(rep(1,n),X);
 		m <- m+1;
 	}
-	if(bonf_l0_{
+	if(bonf_l0){
 		path_length=1;
 		l0_path=-(qchisq(0.05/m,1,lower.tail=FALSE)-log(n)+2*log(0.05/0.95));
 	}
