@@ -1480,7 +1480,7 @@ void run_vbsr_wrapper(double * eps,
 	
 	struct model_struct model;
 	omp_set_num_threads(*nthreads);
-	Rprintf("nthreads: %d, nthreads_o: %d\n",*nthreads,omp_get_max_threads());
+	//Rprintf("nthreads: %d, nthreads_o: %d\n",*nthreads,omp_get_max_threads());
 	//Rprintf("Initializing model...\n");
 	initialize_model(eps,l0_path,pb_path,exclude,penalty_factor,maxit,path_length,n_orderings,regress,scale,est,error,kl,approx,total_replicates,X, y, var_y, n, m,ordering_mat,&model);
 	//Rprintf("Initialized model...\n");
