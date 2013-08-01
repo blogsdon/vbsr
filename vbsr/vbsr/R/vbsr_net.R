@@ -14,7 +14,7 @@ vbsr_net = function(y,
 		bma_approximation = TRUE,
 		screen = 1.0,
 		already_screened = 1.0,
-    bonf_l0=TRUE,
+    		bonf_l0=TRUE,
 		kl = 0.99,
 		l0_path=NULL,
 		n_threads=NULL){
@@ -27,7 +27,7 @@ vbsr_net = function(y,
 	}
   if(bonf_l0){
     path_length=1;
-    l0_path=-(qchisq(0.05/m,1,lower.tail=FALSE)-log(n)-2*log(0.05/0.95));
+    l0_path=-(qchisq(0.05/m,1,lower.tail=FALSE)-log(n)+2*log(0.05/0.95));
   }
 	#n <- nrow(X);
 
