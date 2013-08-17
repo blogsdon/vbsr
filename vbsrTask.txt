@@ -1,0 +1,9 @@
+########vbsr project task list, August 17, 2013
+
+1) Add bonf_l0 parameter (e.g. Bonferroni-95% probability in model)
+2) Get rid of path length input parameter
+3) Add posterior probability to output
+4) Get rid of needless output
+5) Change regression to family (e.g. linear/logistic -> normal/binomial)
+6) Fill out all documentation
+7) Update vignette to include new functionality
