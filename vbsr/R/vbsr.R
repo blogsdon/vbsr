@@ -2,7 +2,6 @@ vbsr = function(y,
 		X,
 		ordering_mat=NULL,
 		eps=1e-6,
-		path_length=200,
 		exclude=NULL,
 		add.intercept=TRUE,
 		maxit = 1e4,
@@ -13,7 +12,7 @@ vbsr = function(y,
 		estimation_type = "BMA",
 		bma_approximation = TRUE,
 		screen = 1.0,
-		bonf_l0=TRUE,
+		post=0.05,
 		already_screened = 1.0,
 		kl = 0.99,
 		l0_path=NULL,
@@ -25,9 +24,14 @@ vbsr = function(y,
 		X <- cbind(rep(1,n),X);
 		m <- m+1;
 	}
-	if(bonf_l0){
+	if(!is.null(post)){
 		path_length=1;
-		l0_path=-(qchisq(0.05/m,1,lower.tail=FALSE)-log(n)+2*log(0.05/0.95));
+		l0_path=-(qchisq(0.05/m,1,lower.tail=FALSE)-log(n)+2*log(post/(1-post)));
+	}else{
+    path_length=length(l0_path)
+    if(path_length==0){
+      stop("invalid penalty parameter path specification")
+    }
 	}
 	#n <- nrow(X);
 
@@ -514,9 +518,21 @@ vbsr = function(y,
 
 		}
 	}	
-	if(bonf_l0){
-		result_list$beta <- result_list$e_beta[-wexc];
-		result_list$z <- result_list$beta_chi[-wexc];
+  modUnique <- which(unique(round(result_list$lb,-log10(eps)-1)));
+  modProb <- exp(result_list$lb-max(result_list$lb))/(sum(exp(result_list$lb-max(result_list$lb))));
+  
+  
+	if(!is.null(post)){
+    result_list2 <- list();
+		result_list2$beta <- result_list$e_beta[-wexc];
+    result_list2$betaSE <- sqrt(result_list$e_beta[-wexc]^2+result_list$beta_p[-wexc]*(result_list$beta_mu[-wexc]^2+result_list$beta_sigma[-wexc]))
+		result_list2$z <- result_list$beta_chi[-wexc];
+    result_list2$pval <- pchisq(result_list2$z^2,1,lower.tail=FALSE);
+    result_list2$post <- result_list$beta_p[-wexc];
+    result_list2$l0 <- result_list$l0_path;
+    result_list2$modelEntropy <- sum(modProb*log(modProb));
+    return(result_list2);
+	}else{
+    return(result_list)
 	}
-	return(result_list);
 }

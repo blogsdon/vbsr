@@ -2,7 +2,7 @@ Package: vbsr
 Type: Package
 Title: Variational Bayes Spike Regression Regularized Linear Models
 Version: 0.0.2
-Date: 2013-07-10
+Date: 2013-08-31
 Author: Benjamin Logsdon
 Maintainer: Benjamin Logsdon <blogsdon@uw.edu>
 Depends: Matrix, utils
