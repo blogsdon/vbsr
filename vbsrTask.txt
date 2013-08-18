@@ -1,5 +1,6 @@
 ########vbsr project task list, August 17, 2013
 
+0) Rename vbsr_net to vbsr
 1) Add bonf_l0 parameter (e.g. Bonferroni-95% probability in model)
 2) Get rid of path length input parameter
 3) Add posterior probability to output
