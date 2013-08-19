@@ -280,11 +280,11 @@ vbsr = function(y,
 			}
 		}
 	}
-	if(!is.null(n_threads)){
-		nthreads=n_threads;
-	}else{
-		nthreads=1;
-	}
+	#if(!is.null(n_threads)){
+	#	nthreads=n_threads;
+	#}else{
+	nthreads=1;
+	#}
 	result <- c();
 	while(length(result)==0){
 		try(result<-.C("run_vbsr_wrapper",

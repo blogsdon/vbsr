@@ -4,7 +4,7 @@
 \description{
     Fit a linear model via a fast coordinate variational Bayes algorithm.
 	Applicable to linear and logistic regression, and solves the problem
-	on a path of the spike (l0) parameter.
+	on either a path of the spike (l0) parameter or at a fixed value based on the data-dimensions.
   }
 \usage{
 vbsr = function(y,
@@ -21,7 +21,7 @@ vbsr = function(y,
 		estimation_type = "BMA",
 		bma_approximation = TRUE,
 		screen = 1.0,
-		post=0.05,
+		post=0.95,
 		already_screened = 1.0,
 		kl = 0.99,
 		l0_path=NULL)}
@@ -65,30 +65,36 @@ vbsr = function(y,
 }
 \value{
 A list with all the results of the vbsr analysis.
-  \item{beta_chi}{}
-  \item{beta_sigma}{}
-  \item{e_beta}{}
-  \item{beta_p}{}
-  \item{lb}{}
-  \item{kl}{}
-  \item{l0_path}{}
-  \item{sma_beta}{}
-  \item{sma_chi}{}
-  \item{screened_ind}{}
-  \item{kl_min}{}
-  \item{kl_mean}{}
-  \item{kl_se}{}
-  \item{ordering_mat}{}
-  \item{which_excluded}{}
+  \item{beta}{The expected value of the penalized regression coefficients.}
+  \item{z}{The Z-statistic for each penalized regression coefficient}
+  \item{pval}{The p-values based on the asymptotic normal assumption of the Z-statistics}
+  \item{post}{The posterior probabilities of each of the regression coefficients}
+  \item{l0}{The penalty parameters used to solve the penalized regression problem}
+  \item{modelEntropy}{The entropy of the identified approximate posterior probability distribution over model space.}
+  \item{modelProb}{The approximate posterior probability distribution over the identified model space.}
+  \item{kl_index}{If a path solution was run with the KL diagnostic statistic then the points in the path where the KL statistic is nearest the min, the mean, the min + 1 s.e., and the mean +1 s.e.}
+  \item{kl}{The KL statistic computed across the path}
+  \item{kl_min}{The minimum KL statistic identified along the path}
+  \item{kl_mean}{The expected KL statistic given the number of features identified}
 }
-\references{Logsdon, B., Hoffman, G. and Mezey, J. (2010)
+\references{Logsdon, B.A, G.E. Hoffman, and J.G. Mezey (2010)
   \emph{A variational Bayes algorithm for fast and 
   accurate multiple locus genome-wide association analysis},
   \url{http://www.biomedcentral.com/1471-2105/11/58},
-  \emph{BMC Bioinformatics, Vol. 11(1), 58 2010}
+  \emph{BMC Bioinformatics, Vol. 11(1), 58}
+  
+  Logsdon, B.A., G.E. Hoffman, and J.G. Mezey, (2012).
+  \emph{Mouse obesity network reconstruction with a variational Bayes algorithm to employ aggresive false positive control},
+  \url{http://www.biomedcentral.com/1471-2105/13/53/},
+  \emph{BMC Bioinformatics, Vol. 13(1), 53}
+  
+  Logsdon, B.A., C.L. Carty, A.P. Reiner, J.Y. Dai, and C. Kooperberg (2012).
+  \emph{A novel variational Bayes multiple locus Z-statistic for genome-wide association studies with Bayesian model averaging.}
+  \url{}
+  \emph{Bioinformatics, Vol. 28(13), 1738-1744}
 }
 \author{Benjamin Logsdon}
-
+f
 \seealso{\code{plot_vbsr_e_beta}, \code{plot_vbsr_beta_p}, 
 	\code{plot_vbsr_beta_chi}, \code{plot_vbsr_boxplot}, 
 	\code{plot_vbsr_kl}, and \code{cv.vbsr_net} functions.}
@@ -111,7 +117,7 @@ A list with all the results of the vbsr analysis.
    y <- y+e;
 
 
-   res<- vbsr_net(y,X,regress="LINEAR");
+   res<- vbsr(y,X,family="normal");
 }
 \keyword{models}
 \keyword{regression}
