@@ -94,10 +94,7 @@ A list with all the results of the vbsr analysis.
   \emph{Bioinformatics, Vol. 28(13), 1738-1744}
 }
 \author{Benjamin Logsdon}
-f
-\seealso{\code{plot_vbsr_e_beta}, \code{plot_vbsr_beta_p}, 
-	\code{plot_vbsr_beta_chi}, \code{plot_vbsr_boxplot}, 
-	\code{plot_vbsr_kl}, and \code{cv.vbsr_net} functions.}
+\seealso{\code{cv.vbsr}}
 \examples{
    library(MASS);
    n <- 100;
