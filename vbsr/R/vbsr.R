@@ -6,7 +6,7 @@ vbsr = function(y,
 		add.intercept=TRUE,
 		maxit = 1e4,
 		n_orderings = 10,
-		regress = "LINEAR",
+    family = "normal",
 		scaling = TRUE,
 		return_kl = TRUE,
 		estimation_type = "BMA",
@@ -71,12 +71,12 @@ vbsr = function(y,
 
 	#maxit = 1e4;
 	#n_orderings = 10;
-	if(regress == "LINEAR"){
+	if(family == "normal"){
 		regress <- 1;
-	} else if (regress == "LOGISTIC"){
+	} else if (family == "binomial"){
 		regress <- 0;
 	} else {
-		stop("Improper type of regression provided. Must be either 'LINEAR' or 'LOGISTIC'.");
+		stop("Improper type of regression provided. Must be either 'normal' or 'binomial'.");
 	}
 	#regress = 0;
 
@@ -518,19 +518,22 @@ vbsr = function(y,
 
 		}
 	}	
-  modUnique <- which(unique(round(result_list$lb,-log10(eps)-1)));
-  modProb <- exp(result_list$lb-max(result_list$lb))/(sum(exp(result_list$lb-max(result_list$lb))));
+  modUnique <- which(!duplicated(round(result_list$lb,-log10(eps)-1)));
+  lb1 <- result_list$lb[modUnique];
+  #print(result_list$lb);
+  modProb <- exp(lb1-max(lb1))/(sum(exp(lb1-max(lb1))));
   
   
 	if(!is.null(post)){
     result_list2 <- list();
 		result_list2$beta <- result_list$e_beta[-wexc];
-    result_list2$betaSE <- sqrt(result_list$e_beta[-wexc]^2+result_list$beta_p[-wexc]*(result_list$beta_mu[-wexc]^2+result_list$beta_sigma[-wexc]))
+    #result_list2$betaSE <- sqrt(result_list$e_beta[-wexc]^2+result_list$beta_p[-wexc]*(result_list$beta_mu[-wexc]^2+result_list$beta_sigma[-wexc]))
 		result_list2$z <- result_list$beta_chi[-wexc];
     result_list2$pval <- pchisq(result_list2$z^2,1,lower.tail=FALSE);
     result_list2$post <- result_list$beta_p[-wexc];
     result_list2$l0 <- result_list$l0_path;
-    result_list2$modelEntropy <- sum(modProb*log(modProb));
+    result_list2$modelEntropy <- -sum(modProb*log(modProb));
+    result_list2$modelProb <- modProb;
     return(result_list2);
 	}else{
     return(result_list)

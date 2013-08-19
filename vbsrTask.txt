@@ -4,7 +4,7 @@
 1) Add bonf_l0 parameter (e.g. Bonferroni-95% probability in model) DONE!
 2) Get rid of path length input parameter DONE!
 3) Add posterior probability to output DONE!
-4) Get rid of needless output
-5) Change regression to family (e.g. linear/logistic -> normal/binomial)
+4) Get rid of needless output DONE!
+5) Change regression to family (e.g. linear/logistic -> normal/binomial) DONE!
 6) Fill out all documentation
 7) Update vignette to include new functionality
