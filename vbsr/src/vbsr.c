@@ -1091,7 +1091,7 @@ void run_vbsr(struct model_struct * model){
 	double tol=1;
 	double lb_old;
 	int count = 0;
-	#pragma omp parallel for private(i,j,count,tol,lb_old)
+	//#pragma omp parallel for private(i,j,count,tol,lb_old)
 	for (i=0;i < model->control_param.n_orderings;i++){
 		for(j=0;j < model->control_param.path_length;j++){
 			if(j>0){
@@ -1479,7 +1479,7 @@ void run_vbsr_wrapper(double * eps,
 						
 	
 	struct model_struct model;
-	omp_set_num_threads(*nthreads);
+	//omp_set_num_threads(*nthreads);
 	//Rprintf("nthreads: %d, nthreads_o: %d\n",*nthreads,omp_get_max_threads());
 	//Rprintf("Initializing model...\n");
 	initialize_model(eps,l0_path,pb_path,exclude,penalty_factor,maxit,path_length,n_orderings,regress,scale,est,error,kl,approx,total_replicates,X, y, var_y, n, m,ordering_mat,&model);

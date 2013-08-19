@@ -12,11 +12,10 @@ vbsr = function(y,
 		estimation_type = "BMA",
 		bma_approximation = TRUE,
 		screen = 1.0,
-		post=0.05,
+		post=0.95,
 		already_screened = 1.0,
 		kl = 0.99,
-		l0_path=NULL,
-		n_threads=NULL){
+		l0_path=NULL){
 
 	n <- nrow(X);
 	m <- ncol(X);
@@ -26,7 +25,7 @@ vbsr = function(y,
 	}
 	if(!is.null(post)){
 		path_length=1;
-		l0_path=-(qchisq(0.05/m,1,lower.tail=FALSE)-log(n)+2*log(post/(1-post)));
+		l0_path=-(qchisq(0.05/m,1,lower.tail=FALSE)-log(n)+2*log((1-post)/(post)));
 	}else{
     path_length=length(l0_path)
     if(path_length==0){
@@ -536,6 +535,25 @@ vbsr = function(y,
     result_list2$modelProb <- modProb;
     return(result_list2);
 	}else{
-    return(result_list)
+    result_list2 <- list();
+    result_list2$beta <- result_list$e_beta[-wexc,];
+    result_list2$z <- result_list$beta_chi[-wexc,];
+    result_list2$pval <- pchisq(result_list2$z^2,1,lower.tail=FALSE);
+    result_list2$post <- result_list$beta_p[-wexc,];
+    result_list2$l0 <- result_list$l0_path;
+    
+    result_list2$modelEntropy <- -sum(modProb*log(modProb));
+    result_list2$modelProb <- modProb;
+    if(!is.null(result_list$kl_index)){
+      result_list2$kl_index <- result_list$kl_index;
+    }
+    if(!is.null(result_list$kl)){
+      result_list2$kl <- result_list$kl;
+      result_list2$kl_min <- result_list$kl_min;
+      result_list2$kl_mean <- result_list$kl_mean;
+      result_list2$kl_se <- result_list$kl_se;
+    }
+        
+    return(result_list2)
 	}
 }

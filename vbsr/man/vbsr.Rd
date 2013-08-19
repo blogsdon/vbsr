@@ -1,5 +1,5 @@
-\name{vbsr_net}
-\alias{vbsr_net}
+\name{vbsr}
+\alias{vbsr}
 \title{fit a linear model with variational Bayes spike penalty}
 \description{
     Fit a linear model via a fast coordinate variational Bayes algorithm.
@@ -7,56 +7,56 @@
 	on a path of the spike (l0) parameter.
   }
 \usage{
-vbsr_net(y, 
-		X,
+vbsr = function(y,
+  	X,
 		ordering_mat=NULL,
 		eps=1e-6,
-		path_length=200,
 		exclude=NULL,
 		add.intercept=TRUE,
 		maxit = 1e4,
 		n_orderings = 10,
-		regress = "LINEAR",
+    family = "normal",
 		scaling = TRUE,
 		return_kl = TRUE,
 		estimation_type = "BMA",
 		bma_approximation = TRUE,
 		screen = 1.0,
+		post=0.05,
 		already_screened = 1.0,
 		kl = 0.99,
 		l0_path=NULL)}
 
 \arguments{
-  \item{y}{response variable. Normally distributed errors for \code{regress="LINEAR"}.
-  For \code{regress="LOGISTIC"} should be coded as a vector of 0's and 1's.}
+  \item{y}{response variable. Normally distributed errors for \code{family="normal"}.
+  For \code{family="binomial"} should be coded as a vector of 0's and 1's.}
   \item{X}{Design matrix, an n x m matrix, with rows as observations}
   \item{ordering_mat}{Optionally specified coordinate update ordering matrix.  Must be
   in matrix form with columns as permutation vectors of length m, and there must be
   \code{n_orderings} columns. }
   \item{eps}{Tolerance used to determine convergence of the algorithm based on the lower bound.}
-  \item{path_length}{The length of the path solution used.}
   \item{exclude}{An optional indicator vector of length m of 0's and 1's indicating whether to penalize
   a particular variable or not (0=penalize, 1=unpenalized)}
   \item{add.intercept}{A boolean variable indicating whether or not to include an unpenalized intercept variable.}
   \item{maxit}{The maximum number of iterations to run the algorithm for a given solution to a penalized
   regression problem.}
   \item{n_orderings}{The number of random starts used.}
-  \item{regress}{The type of error model used.  Currently supported modes are \code{regress="LINEAR"} and
-  \code{regress="LOGISTIC"}}
+  \item{family}{The type of error model used.  Currently supported modes are \code{family="normal"} and
+  \code{family="binomial"}}
   \item{scaling}{A boolean variable indicating whether or not to scale the columns of X to have
   mean zero and variance one.}
   \item{return_kl}{A boolean variable indicating whether or not to return an analysis of the null
-  distributed features in the data-set as a function of the path position.}
+  distributed features in the data-set as a function of the penalty parameter.}
   \item{estimation_type}{The type of estimation to perform based on the number of unique solution identified
   to the penalized regression problem.  Valid values are \code{estimation_type="BMA"} and
   \code{estimation_type="MAXIMAL"}}.
   \item{bma_approximation}{A boolean variable indicating whether to compute a full correction to the
-  \code{beta_chi} statistic. WARNING can make the algorithm very computationally intensive for highly
-  multi-model posterior surfaces.}
-  \item{screen}{}
-  \item{already_screened}{}
-  \item{kl}{}
-  \item{l0_path}{}
+  \code{z} statistic. WARNING can make the algorithm very computationally intensive for highly
+  multi-modal posterior surfaces.}
+  \item{screen}{P-value to do marginal screening.  Default is to not do marginal prescreening (e.g marginal p-value of 1.0)}
+  \item{post}{Choice of penalty parameter such that a feature will have a  posterior probability of 0.95 if it passes a Bonferroni correction in the multivariate model.  Default is \code{post=.95}.  More conservative approach would be \code{post=0.5}}
+  \item{already_screened}{If features are already screened, the marginal p-value used for screening.}
+  \item{kl}{The inner percentiles of the distribution to compute the Kullback-Leibler overfitting statistic.  Only works for analysis when directly specifying a path of penalization parameter (e.g. \code{l0_path}).  For default \code{kl=0.99} the KL-statistic is used for the statistics between the 1\%-99\% of the distribution.}
+  \item{l0_path}{The path of penalty parameters to solve the spike regression problem.  If \code{post} is specified, this is computed automatically.}
 }
 \details{
   The solutions to the spike penalized regression model are fit with a 
