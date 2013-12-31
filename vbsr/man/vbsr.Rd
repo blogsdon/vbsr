@@ -7,7 +7,7 @@
 	on either a path of the spike (l0) parameter or at a fixed value based on the data-dimensions.
   }
 \usage{
-vbsr = function(y,
+vbsr(y,
   	X,
 		ordering_mat=NULL,
 		eps=1e-6,
@@ -93,8 +93,8 @@ A list with all the results of the vbsr analysis.
   \url{}
   \emph{Bioinformatics, Vol. 28(13), 1738-1744}
 }
-\author{Benjamin Logsdon}
-\seealso{\code{cv.vbsr}}
+\author{Benjamin A. Logsdon}
+\seealso{\code{compute_KL}}
 \examples{
    library(MASS);
    n <- 100;

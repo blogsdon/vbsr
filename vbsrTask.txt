@@ -6,7 +6,8 @@
 3) Add posterior probability to output DONE!
 4) Get rid of needless output DONE!
 5) Change regression to family (e.g. linear/logistic -> normal/binomial) DONE!
-6) Fix cross validation function
-7) Git rid of plotting functions
+6) Fix cross validation function REMOVED!
+7) Git rid of plotting functions DONE!
 7) Fill out all documentation
 8) Update vignette to include new functionality
+9) Run tests to make sure it passes all of the functionality metrics
