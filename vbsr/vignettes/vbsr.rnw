@@ -1,0 +1,119 @@
+\documentclass[a4paper]{article}
+\usepackage{graphicx}
+
+\title{vbsr: Variational Bayes Spike regression}
+\author{Benjamin A. Logsdon}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+%\VignetteIndexEntry{Using vbsr}
+\maketitle
+\section{Example 1}
+We first consider the case of uncorrelated features, and a linear response, with a sparse true model with 100 observations, 95 variables, and 10 true variables:
+
+<<>>=
+library(vbsr)
+set.seed(2)
+n <- 100
+m <- 95
+ntrue <- 10
+e <- rnorm(n)
+X <- matrix(rnorm(n*m),n,m)
+tbeta <- sample(1:m,ntrue)
+beta <- rep(0,m)
+beta[tbeta]<- rnorm(ntrue,0,2)
+y <- X%*%beta+e
+res<- vbsr(y,X,family='normal')
+@
+<<fig=TRUE>>=
+plot(res$beta,beta)
+@
+\\
+And the -log10 p-values:
+<<fig=TRUE>>=
+plot(-log10(res$pval),log='y')
+lines(c(-10,m+10),c(-log10(0.05/m),-log10(0.05/m)),col='red',lwd=3)
+@
+\\
+True features v.s. features significant in vbsr:
+<<>>=
+cat('True variables:',sort(tbeta),'\n');
+cat('Vbsr variables:',which(res$pval<0.05/m),'\n');
+@
+Compare this to the OLS estimates
+<<>>=
+ols <- lm(y~X);
+beta_ols <- summary(ols)$coef[-1,1];
+beta_vbsr <- res$beta;
+cat('OLS MSE:',mean((beta-beta_ols)^2),'\n');
+cat('VBSR MSE:',mean((beta-beta_vbsr)^2),'\n');
+@
+<<fig=TRUE>>=
+#barplot(t(cbind(beta[tbeta],summary(ols)$coef[-1,1][tbeta],res$beta[tbeta])),beside=T,col=c('blue','red','green'))
+#legend('topleft',c('beta','beta_ols','beta_vbsr'),fill=c('blue','red','green'))
+plot((beta-beta_ols)^2,(beta-beta_vbsr)^2)
+@
+<<fig=TRUE>>=
+pairs(cbind(beta,beta_ols,beta_vbsr));
+@
+\\
+Compare to univariate estimates
+<<>>=
+lmfun <- function(x,y){return(summary(lm(y~x))$coef[2,1]);}
+beta_uni <- apply(X,2,lmfun,y);
+cat('UNI MSE:',mean((beta-beta_uni)^2),'\n');
+cat('VBSR MSE:',mean((beta-beta_vbsr)^2),'\n');
+@
+
+\section{Example 2}
+We next consider the case of moderately correlated features.
+
+<<>>=
+g <- rnorm(n);
+X <- X+g;
+y <- X%*%beta+e
+res<- vbsr(y,X,family='normal')
+@
+<<fig=TRUE>>=
+plot(res$beta,beta)
+@
+\\
+And the -log10 p-values:
+<<fig=TRUE>>=
+plot(-log10(res$pval),log='y')
+lines(c(-10,m+10),c(-log10(0.05/m),-log10(0.05/m)),col='red',lwd=3)
+@
+\\
+True features v.s. features significant in vbsr:
+<<>>=
+cat('True variables:',sort(tbeta),'\n');
+cat('Vbsr variables:',which(res$pval<0.05/m),'\n');
+@
+Compare this to the OLS estimates
+<<>>=
+ols <- lm(y~X);
+beta_ols <- summary(ols)$coef[-1,1];
+beta_vbsr <- res$beta;
+cat('OLS MSE:',mean((beta-beta_ols)^2),'\n');
+cat('VBSR MSE:',mean((beta-beta_vbsr)^2),'\n');
+@
+<<fig=TRUE>>=
+#barplot(t(cbind(beta[tbeta],summary(ols)$coef[-1,1][tbeta],res$beta[tbeta])),beside=T,col=c('blue','red','green'))
+#legend('topleft',c('beta','beta_ols','beta_vbsr'),fill=c('blue','red','green'))
+plot((beta-beta_ols)^2,(beta-beta_vbsr)^2)
+@
+<<fig=TRUE>>=
+pairs(cbind(beta,beta_ols,beta_vbsr));
+@
+\\
+Compare to univariate estimates
+<<>>=
+lmfun <- function(x,y){return(summary(lm(y~x))$coef[2,1]);}
+beta_uni <- apply(X,2,lmfun,y);
+cat('UNI MSE:',mean((beta-beta_uni)^2),'\n');
+cat('VBSR MSE:',mean((beta-beta_vbsr)^2),'\n');
+@
+
+\end{document}
+
+
