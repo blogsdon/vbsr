@@ -13,7 +13,6 @@ We first consider the case of uncorrelated features, and a linear response, with
 
 <<>>=
 library(vbsr)
-library(MASS)
 set.seed(2)
 n <- 100
 m <- 95
