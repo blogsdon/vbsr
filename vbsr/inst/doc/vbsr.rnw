@@ -3,7 +3,7 @@
 
 \title{vbsr: Variational Bayes Spike regression}
 \author{Benjamin A. Logsdon}
-
+\VignetteIndexEntry{vbsr}
 \begin{document}
 \SweaveOpts{concordance=TRUE}
 
