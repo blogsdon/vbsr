@@ -113,19 +113,6 @@ beta_uni <- apply(X,2,lmfun,y);
 cat('UNI MSE:',mean((beta-beta_uni)^2),'\n');
 cat('VBSR MSE:',mean((beta-beta_vbsr)^2),'\n');
 @
-Increase the number of restarts
-<<>>=
-res<- vbsr(y,X,family='normal',n_orderings=2000)
-@
-Compare to univariate estimates
-<<>>=
-lmfun <- function(x,y){return(summary(lm(y~x))$coef[2,1]);}
-beta_uni <- apply(X,2,lmfun,y);
-cat('UNI MSE:',mean((beta-beta_uni)^2),'\n');
-cat('VBSR MSE:',mean((beta-res$beta)^2),'\n');
-@
-
-
 
 \end{document}
 
