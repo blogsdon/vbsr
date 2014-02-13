@@ -104,12 +104,7 @@ A list with all the results of the vbsr analysis.
    tbeta <- sample(1:m,ntrue);
    beta <- rep(0,m);
    beta[tbeta]<- rnorm(ntrue,0,.3);
-   y <- rep(0,n);
-   for(i in 1:n){
-	for(j in 1:m){
-		y[i] <- y[i] + X[i,j]*beta[j];
-	}
-   }
+   y <- X\%*\%beta;
    y <- y+e;
 
 

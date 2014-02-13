@@ -34,7 +34,6 @@ compute_KL(Zmat,alpha,pval)
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 \seealso{\code{vbsr}}
 \examples{
-   library(MASS);
    n <- 100;
    m <- 500;
    ntrue <- 10;
@@ -43,15 +42,8 @@ compute_KL(Zmat,alpha,pval)
    tbeta <- sample(1:m,ntrue);
    beta <- rep(0,m);
    beta[tbeta]<- rnorm(ntrue,0,.3);
-   y <- rep(0,n);
-   for(i in 1:n){
-  for(j in 1:m){
-		y[i] <- y[i] + X[i,j]*beta[j];
-	}
-   }
+   y <- X\%*\%beta;
    y <- y+e;
-
-
    res<- vbsr(y,X,family="normal",l0_path=seq(-15,-3,length.out=100),post=NULL);
    klRes <- compute_KL(res$z,0.01,1);
    
