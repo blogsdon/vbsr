@@ -96,7 +96,6 @@ A list with all the results of the vbsr analysis.
 \author{Benjamin A. Logsdon}
 \seealso{\code{compute_KL}}
 \examples{
-   library(MASS);
    n <- 100;
    m <- 500;
    ntrue <- 10;

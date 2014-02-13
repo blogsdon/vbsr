@@ -15,7 +15,8 @@ vbsr = function(y,
 		post=0.95,
 		already_screened = 1.0,
 		kl = 0.99,
-		l0_path=NULL){
+		l0_path=NULL,
+    n_threads=NULL){
 
 	n <- nrow(X);
 	m <- ncol(X);
@@ -280,11 +281,11 @@ vbsr = function(y,
 			}
 		}
 	}
-	#if(!is.null(n_threads)){
-	#	nthreads=n_threads;
-	#}else{
-	nthreads=1;
-	#}
+	if(!is.null(n_threads)){
+	  nthreads=n_threads;
+	}else{
+	  nthreads=1;
+	}
 	result <- c();
 	while(length(result)==0){
 		try(result<-.C("run_vbsr_wrapper",

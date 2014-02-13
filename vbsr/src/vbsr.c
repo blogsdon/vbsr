@@ -4,21 +4,21 @@
 
 
 //xc: return jth column of data matrix x
-inline double * xc(struct model_struct * model, int j){
+double * xc(struct model_struct * model, int j){
 	return (&(model->data.X[j]))->col;
 }
 
-inline double * xcm(struct model_marg_struct * model, int j){
+double * xcm(struct model_marg_struct * model, int j){
 	return (&(model->data.X[j]))->col;
 }
 
 //oc: return jth column of ordering matrix "ordering"
-inline int * oc(struct model_struct * model, int j){
+int * oc(struct model_struct * model, int j){
 	return (&(model->data.ordering[j]))->col;
 }
 
 //me: return the ith, jth element of the ordering, path model parameters
-inline struct model_param_struct * me(struct model_struct * model,int i, int j){
+struct model_param_struct * me(struct model_struct * model,int i, int j){
 	return (&((&(model->order[i]))->model_param[j]));
 }
 
@@ -104,24 +104,24 @@ void free_model_param(struct model_struct * model, int i, int j){
 }
 
 
-inline void ddot_w(int n,double *vect1,double *vect2,double * result){
+void ddot_w(int n,double *vect1,double *vect2,double * result){
 	const int incxy = 1;
 	(*result)=F77_NAME(ddot)(&n,vect1,&incxy,vect2,&incxy);
 }
 
 
-inline void daxpy_w(int n,double *x,double *y,double alpha){
+void daxpy_w(int n,double *x,double *y,double alpha){
 	//y<- ax+y;
 	const int incxy =1;
 	F77_NAME(daxpy)(&n,&alpha,x,&incxy,y,&incxy);
 }
 
-inline void dnrm2_w(int n,double *x,double *result){
+void dnrm2_w(int n,double *x,double *result){
 	const int incxy=1;
 	(*result)=F77_NAME(dnrm2)(&n,x,&incxy);
 }
 
-inline void dscal_w(int n,double *x, double alpha){
+void dscal_w(int n,double *x, double alpha){
 	const int incxy=1;
 	F77_NAME(dscal)(&n,&alpha,x,&incxy);
 }
@@ -176,7 +176,7 @@ void cor(double * vec1, double * vec2, double * ones,double * corv,int n){
 
 }
 
-inline double compute_ssq(double *vec,int n){
+double compute_ssq(double *vec,int n){
 	double a;
 	ddot_w(n,vec,vec,&a);
 	return a;

@@ -1,3 +1,2 @@
 useDynLib("vbsr")
-export(compute_KL,cv.vbsr_net,plot_vbsr_beta_chi,plot_vbsr_beta_p,
-plot_vbsr_boxplot,plot_vbsr_e_beta,plot_vbsr_kl,vbsr,rtnorm)
+export(compute_KL,vbsr)

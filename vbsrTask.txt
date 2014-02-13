@@ -9,5 +9,5 @@
 6) Fix cross validation function REMOVED!
 7) Git rid of plotting functions DONE!
 7) Fill out all documentation DONE!
-8) Update vignette to include new functionality
+8) Update vignette to include new functionality DONE!
 9) Run tests to make sure it passes all of the functionality metrics
