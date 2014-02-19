@@ -15,7 +15,8 @@ vbsr = function(y,
 		post=0.95,
 		already_screened = 1.0,
 		kl = 0.99,
-		l0_path=NULL){
+		l0_path=NULL,
+    cleanSolution=FALSE){
 
 	n <- nrow(X);
 	m <- ncol(X);
@@ -533,6 +534,25 @@ vbsr = function(y,
     result_list2$l0 <- result_list$l0_path;
     result_list2$modelEntropy <- -sum(modProb*log(modProb));
     result_list2$modelProb <- modProb;
+    if(cleanSolution){
+      fastlm <- function(y,X){
+        n1 <- nrow(X)
+        X <- cbind(rep(1,n1),X);
+        ginv <- solve(t(X)%*%X);
+        Xhat <- ginv%*%t(X);
+        betahat <- Xhat%*%y;
+        sig <- mean((y-X%*%betahat)^2)*((n1)/(n1-ncol(X)));
+        zval <- betahat/sqrt(sig*diag(ginv));
+        return(zval[-1]);
+      }
+      signif <- result_list2$pval < 0.05/m;
+      #a1 <- fastlm(y,X[,-wexc][,signif])
+      #print(a1)
+      if(sum(signif)>1){
+        result_list2$z[signif] <- fastlm(y,X[,-wexc][,signif]);
+        result_list2$pval[signif] <- pchisq(result_list2$z[signif]^2,1,lower.tail=FALSE);
+      }
+    }
     return(result_list2);
 	}else{
     result_list2 <- list();
