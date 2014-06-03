@@ -24,7 +24,8 @@ vbsr(y,
 		post=0.95,
 		already_screened = 1.0,
 		kl = 0.99,
-		l0_path=NULL)}
+		l0_path=NULL,
+    cleanSolution=FALSE)}
 
 \arguments{
   \item{y}{response variable. Normally distributed errors for \code{family="normal"}.
@@ -57,6 +58,7 @@ vbsr(y,
   \item{already_screened}{If features are already screened, the marginal p-value used for screening.}
   \item{kl}{The inner percentiles of the distribution to compute the Kullback-Leibler overfitting statistic.  Only works for analysis when directly specifying a path of penalization parameter (e.g. \code{l0_path}).  For default \code{kl=0.99} the KL-statistic is used for the statistics between the 1\%-99\% of the distribution.}
   \item{l0_path}{The path of penalty parameters to solve the spike regression problem.  If \code{post} is specified, this is computed automatically.}
+  \item{cleanSolution}{This parameter determines whether a given solution is further filtered using an unpenalized model.  If \code{cleanSolution=TRUE}, then the features that are significant after a Bonferroni correction given the p-values from the vbsr regression model are then tested in an unpenalized linear regression model.  The p-values and z-statistics are updated using the Wald test from the unpenalized linear regression model for the features that were selected.}
 }
 \details{
   The solutions to the spike penalized regression model are fit with a 
@@ -66,6 +68,7 @@ vbsr(y,
 \value{
 A list with all the results of the vbsr analysis.
   \item{beta}{The expected value of the penalized regression coefficients.}
+  \item{alpha}{The estimated value of the unpenalized regression coefficients.}
   \item{z}{The Z-statistic for each penalized regression coefficient}
   \item{pval}{The p-values based on the asymptotic normal assumption of the Z-statistics}
   \item{post}{The posterior probabilities of each of the regression coefficients}
