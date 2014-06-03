@@ -2,6 +2,9 @@ sparrow <- function(data,regulatorIndex=NULL,Covariates=NULL,cleanSolution=NULL,
   #reformat data
   extractEdges = function(index,data,Covariates=NULL,index2=NULL,...){
     #index2 is indices of regulators in X
+    if(index%%10==0){
+      cat('Number of nodes computed: ',index,'\n');
+    }
     X <- data;
     if(is.null(index2)){
       y <- X[,index];

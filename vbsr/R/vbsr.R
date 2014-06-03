@@ -527,6 +527,7 @@ vbsr = function(y,
 	if(!is.null(post)){
     result_list2 <- list();
 		result_list2$beta <- result_list$e_beta[-wexc];
+    result_list2$alpha <- result_list$e_beta[wexc];
     #result_list2$betaSE <- sqrt(result_list$e_beta[-wexc]^2+result_list$beta_p[-wexc]*(result_list$beta_mu[-wexc]^2+result_list$beta_sigma[-wexc]))
 		result_list2$z <- result_list$beta_chi[-wexc];
     result_list2$pval <- pchisq(result_list2$z^2,1,lower.tail=FALSE);
@@ -557,6 +558,7 @@ vbsr = function(y,
 	}else{
     result_list2 <- list();
     result_list2$beta <- result_list$e_beta[-wexc,];
+    result_list2$alpha <- result_list$e_beta[wexc,];
     result_list2$z <- result_list$beta_chi[-wexc,];
     result_list2$pval <- pchisq(result_list2$z^2,1,lower.tail=FALSE);
     result_list2$post <- result_list$beta_p[-wexc,];
