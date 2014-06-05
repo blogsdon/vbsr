@@ -457,7 +457,7 @@ void initialize_model_marg(double * eps,
 	model->model_param.beta_sigma = (double *) malloc(sizeof(double)*(*m));
 	model->model_param.beta_chi = (double *) malloc(sizeof(double)*(*m));
 	model->model_param.beta_p = (double *) malloc(sizeof(double)*(*m));
-	
+	model->model_param.sigma_e = *var_y;
 	
 	
 	for(k=0;k<(*m);k++){
@@ -473,6 +473,7 @@ void initialize_model_marg(double * eps,
 	model->model_param.pred_vec_old = (double *) malloc(sizeof(double)*(*n));
 	model->model_param.pred_vec_new = (double *) malloc(sizeof(double)*(*n));
 	model->model_param.x_w = (double *) malloc(sizeof(double)*(*n));
+  
 	for(k=0;k<(*n);k++){
 		model->model_param.w_vec[k] = 0.25;
 		model->model_param.mu_vec[k] = 0.5;
@@ -770,8 +771,9 @@ void update_beta(struct model_struct * model, int i, int j){
 void update_beta_marg(struct model_marg_struct * model, int * use_vec,int cv){
 
 	int k,l,exc,t;
-	double mu, sigma,prec, chi, p, e_b,e_b2,l0;
-
+	double mu, sigma,prec, p, e_b;
+  //double l0, e_b2, chi;
+  
 	//l0 = model->control_param.l0_path[j];
 	//Rprintf("l0: %g\n",l0);
 	//Rprintf("m: %d\n",model->data.m);
@@ -796,7 +798,7 @@ void update_beta_marg(struct model_marg_struct * model, int * use_vec,int cv){
 				//Rprintf("mu: %g\n",mu);
 				sigma = 1/((1/model->model_param.sigma_e)*(model->data.x_sum_sq[k]));
 				//Rprintf("sigma: %g\n",sigma);
-				chi = pow(mu,2)/sigma;
+				//chi = pow(mu,2)/sigma;
 				//Rprintf("chi: %g, e_beta[%d]: %g\n",chi,k,me(model,i,j)->e_beta[k]);
 				if(exc==0){
 					//p = 1/(1+exp(-0.5*(chi+l0+log(sigma))));
@@ -804,12 +806,12 @@ void update_beta_marg(struct model_marg_struct * model, int * use_vec,int cv){
 					//e_b = p*mu;
 					e_b = mu;
 					//e_b2 = p*(pow(mu,2)+sigma);
-					e_b2 = pow(mu,2);
+					//e_b2 = pow(mu,2);
 					//Rprintf("p: %g, e_b: %g, e_b2: %g, k: %d\n",p,e_b,e_b2,k);
 				}else{
 					p = 0;
 					e_b = mu;
-					e_b2 = pow(mu,2);
+					//e_b2 = pow(mu,2);
 					//Rprintf("p: %g, e_b: %g, e_b2: %g, k: %d\n",p,e_b,e_b2,k);					
 				}
 
@@ -817,11 +819,15 @@ void update_beta_marg(struct model_marg_struct * model, int * use_vec,int cv){
 				//me(model,i,j)->v_sums_correct = me(model,i,j)->v_sums_correct + (pow(e_b,2)-e_b2)*(model->data.x_sum_sq[k]);
 					
 				daxpy_w(model->data.n,xcm(model,k),model->model_param.resid_vec,model->model_param.beta_mu[k]-e_b);
-
+        //Rprintf("daxpy\n");
 				model->model_param.beta_mu[k] = mu;
+        //Rprintf("mu\n");
 				model->model_param.beta_sigma[k] = sigma;
+        //Rprintf("sigma\n");
 				model->model_param.beta_chi[k] = mu/sqrt(sigma);
+        //Rprintf("chi\n");
 				model->model_param.beta_p[k] = p;
+        //Rprintf("p\n");
 			}
 			break;
 		case LOGISTIC:
@@ -849,7 +855,7 @@ void update_beta_marg(struct model_marg_struct * model, int * use_vec,int cv){
 				mu = mu/prec;
 				//Rprintf("mu: %g\n",mu);
 
-				chi = pow(mu,2)/sigma;
+				//chi = pow(mu,2)/sigma;
 				//Rprintf("chi: %g, e_beta[%d]: %g\n",chi,k,me(model,i,j)->e_beta[k]);
 				if(exc==0){
 					//p = 1/(1+exp(-0.5*(chi+l0+log(sigma))));
@@ -857,12 +863,12 @@ void update_beta_marg(struct model_marg_struct * model, int * use_vec,int cv){
 					//e_b = p*mu;
 					e_b = mu;
 					//e_b2 = p*(pow(mu,2)+sigma);
-					e_b2 = pow(mu,2);
+					//e_b2 = pow(mu,2);
 					//Rprintf("p: %g, e_b: %g, e_b2: %g, sigma: %g, k: %d\n",p,e_b,e_b2,sigma,k);
 				}else{
 					p = 0;
 					e_b = mu;
-					e_b2 = pow(mu,2);
+					//e_b2 = pow(mu,2);
 					//Rprintf("p: %g, e_b: %g, e_b2: %g, sigma: %g, k: %d\n",p,e_b,e_b2,sigma,k);					
 				}
 
@@ -1048,8 +1054,8 @@ void update_lb_marg(struct model_marg_struct * model){
 
 
 	double lba;
-	double nd = (double) model->data.n;
-	double md = (double) model->data.m;
+	//double nd = (double) model->data.n;
+	//double md = (double) model->data.m;
 	int t;
 
 	switch(model->control_param.regressType){
