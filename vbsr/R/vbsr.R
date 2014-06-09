@@ -552,7 +552,7 @@ vbsr = function(y,
       if(sum(signif)>1){
         result_list2$z[signif] <- fastlm(y,X[,-wexc][,signif]);
         #result_list2$pval[signif] <- pchisq(result_list2$z[signif]^2,1,lower.tail=FALSE);
-        result_list2$pval[signif] <- pt(abs(result_list2$z[signif]),nrow(X)-ncol(X)-1,lower.tail=FALSE)*2;
+        result_list2$pval[signif] <- pt(abs(result_list2$z[signif]),nrow(X)-ncol(X[,-wexc][,signif])-1,lower.tail=FALSE)*2;
       }
     }
     return(result_list2);
