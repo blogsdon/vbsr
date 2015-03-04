@@ -4,21 +4,21 @@
 
 
 //xc: return jth column of data matrix x
-double * xc(struct model_struct * model, int j){
+inline double * xc(struct model_struct * model, int j){
 	return (&(model->data.X[j]))->col;
 }
 
-double * xcm(struct model_marg_struct * model, int j){
+inline double * xcm(struct model_marg_struct * model, int j){
 	return (&(model->data.X[j]))->col;
 }
 
 //oc: return jth column of ordering matrix "ordering"
-int * oc(struct model_struct * model, int j){
+inline int * oc(struct model_struct * model, int j){
 	return (&(model->data.ordering[j]))->col;
 }
 
 //me: return the ith, jth element of the ordering, path model parameters
-struct model_param_struct * me(struct model_struct * model,int i, int j){
+inline struct model_param_struct * me(struct model_struct * model,int i, int j){
 	return (&((&(model->order[i]))->model_param[j]));
 }
 
@@ -104,24 +104,24 @@ void free_model_param(struct model_struct * model, int i, int j){
 }
 
 
-void ddot_w(int n,double *vect1,double *vect2,double * result){
+inline void ddot_w(int n,double *vect1,double *vect2,double * result){
 	const int incxy = 1;
 	(*result)=F77_NAME(ddot)(&n,vect1,&incxy,vect2,&incxy);
 }
 
 
-void daxpy_w(int n,double *x,double *y,double alpha){
+inline void daxpy_w(int n,double *x,double *y,double alpha){
 	//y<- ax+y;
 	const int incxy =1;
 	F77_NAME(daxpy)(&n,&alpha,x,&incxy,y,&incxy);
 }
 
-void dnrm2_w(int n,double *x,double *result){
+inline void dnrm2_w(int n,double *x,double *result){
 	const int incxy=1;
 	(*result)=F77_NAME(dnrm2)(&n,x,&incxy);
 }
 
-void dscal_w(int n,double *x, double alpha){
+inline void dscal_w(int n,double *x, double alpha){
 	const int incxy=1;
 	F77_NAME(dscal)(&n,&alpha,x,&incxy);
 }
@@ -176,7 +176,7 @@ void cor(double * vec1, double * vec2, double * ones,double * corv,int n){
 
 }
 
-double compute_ssq(double *vec,int n){
+inline double compute_ssq(double *vec,int n){
 	double a;
 	ddot_w(n,vec,vec,&a);
 	return a;
@@ -457,7 +457,7 @@ void initialize_model_marg(double * eps,
 	model->model_param.beta_sigma = (double *) malloc(sizeof(double)*(*m));
 	model->model_param.beta_chi = (double *) malloc(sizeof(double)*(*m));
 	model->model_param.beta_p = (double *) malloc(sizeof(double)*(*m));
-	model->model_param.sigma_e = *var_y;
+	
 	
 	
 	for(k=0;k<(*m);k++){
@@ -473,7 +473,6 @@ void initialize_model_marg(double * eps,
 	model->model_param.pred_vec_old = (double *) malloc(sizeof(double)*(*n));
 	model->model_param.pred_vec_new = (double *) malloc(sizeof(double)*(*n));
 	model->model_param.x_w = (double *) malloc(sizeof(double)*(*n));
-  
 	for(k=0;k<(*n);k++){
 		model->model_param.w_vec[k] = 0.25;
 		model->model_param.mu_vec[k] = 0.5;
@@ -771,9 +770,8 @@ void update_beta(struct model_struct * model, int i, int j){
 void update_beta_marg(struct model_marg_struct * model, int * use_vec,int cv){
 
 	int k,l,exc,t;
-	double mu, sigma,prec, p, e_b;
-  //double l0, e_b2, chi;
-  
+	double mu, sigma,prec, chi, p, e_b,e_b2,l0;
+
 	//l0 = model->control_param.l0_path[j];
 	//Rprintf("l0: %g\n",l0);
 	//Rprintf("m: %d\n",model->data.m);
@@ -798,7 +796,7 @@ void update_beta_marg(struct model_marg_struct * model, int * use_vec,int cv){
 				//Rprintf("mu: %g\n",mu);
 				sigma = 1/((1/model->model_param.sigma_e)*(model->data.x_sum_sq[k]));
 				//Rprintf("sigma: %g\n",sigma);
-				//chi = pow(mu,2)/sigma;
+				chi = pow(mu,2)/sigma;
 				//Rprintf("chi: %g, e_beta[%d]: %g\n",chi,k,me(model,i,j)->e_beta[k]);
 				if(exc==0){
 					//p = 1/(1+exp(-0.5*(chi+l0+log(sigma))));
@@ -806,12 +804,12 @@ void update_beta_marg(struct model_marg_struct * model, int * use_vec,int cv){
 					//e_b = p*mu;
 					e_b = mu;
 					//e_b2 = p*(pow(mu,2)+sigma);
-					//e_b2 = pow(mu,2);
+					e_b2 = pow(mu,2);
 					//Rprintf("p: %g, e_b: %g, e_b2: %g, k: %d\n",p,e_b,e_b2,k);
 				}else{
 					p = 0;
 					e_b = mu;
-					//e_b2 = pow(mu,2);
+					e_b2 = pow(mu,2);
 					//Rprintf("p: %g, e_b: %g, e_b2: %g, k: %d\n",p,e_b,e_b2,k);					
 				}
 
@@ -819,15 +817,11 @@ void update_beta_marg(struct model_marg_struct * model, int * use_vec,int cv){
 				//me(model,i,j)->v_sums_correct = me(model,i,j)->v_sums_correct + (pow(e_b,2)-e_b2)*(model->data.x_sum_sq[k]);
 					
 				daxpy_w(model->data.n,xcm(model,k),model->model_param.resid_vec,model->model_param.beta_mu[k]-e_b);
-        //Rprintf("daxpy\n");
+
 				model->model_param.beta_mu[k] = mu;
-        //Rprintf("mu\n");
 				model->model_param.beta_sigma[k] = sigma;
-        //Rprintf("sigma\n");
 				model->model_param.beta_chi[k] = mu/sqrt(sigma);
-        //Rprintf("chi\n");
 				model->model_param.beta_p[k] = p;
-        //Rprintf("p\n");
 			}
 			break;
 		case LOGISTIC:
@@ -855,7 +849,7 @@ void update_beta_marg(struct model_marg_struct * model, int * use_vec,int cv){
 				mu = mu/prec;
 				//Rprintf("mu: %g\n",mu);
 
-				//chi = pow(mu,2)/sigma;
+				chi = pow(mu,2)/sigma;
 				//Rprintf("chi: %g, e_beta[%d]: %g\n",chi,k,me(model,i,j)->e_beta[k]);
 				if(exc==0){
 					//p = 1/(1+exp(-0.5*(chi+l0+log(sigma))));
@@ -863,12 +857,12 @@ void update_beta_marg(struct model_marg_struct * model, int * use_vec,int cv){
 					//e_b = p*mu;
 					e_b = mu;
 					//e_b2 = p*(pow(mu,2)+sigma);
-					//e_b2 = pow(mu,2);
+					e_b2 = pow(mu,2);
 					//Rprintf("p: %g, e_b: %g, e_b2: %g, sigma: %g, k: %d\n",p,e_b,e_b2,sigma,k);
 				}else{
 					p = 0;
 					e_b = mu;
-					//e_b2 = pow(mu,2);
+					e_b2 = pow(mu,2);
 					//Rprintf("p: %g, e_b: %g, e_b2: %g, sigma: %g, k: %d\n",p,e_b,e_b2,sigma,k);					
 				}
 
@@ -1057,8 +1051,8 @@ void update_lb_marg(struct model_marg_struct * model){
 
 
 	double lba;
-	//double nd = (double) model->data.n;
-	//double md = (double) model->data.m;
+	double nd = (double) model->data.n;
+	double md = (double) model->data.m;
 	int t;
 
 	switch(model->control_param.regressType){
@@ -1100,7 +1094,7 @@ void run_vbsr(struct model_struct * model){
 	double tol=1;
 	double lb_old;
 	int count = 0;
-	//#pragma omp parallel for private(i,j,count,tol,lb_old)
+	#pragma omp parallel for private(i,j,count,tol,lb_old)
 	for (i=0;i < model->control_param.n_orderings;i++){
 		for(j=0;j < model->control_param.path_length;j++){
 			if(j>0){
@@ -1488,7 +1482,7 @@ void run_vbsr_wrapper(double * eps,
 						
 	
 	struct model_struct model;
-	//omp_set_num_threads(*nthreads);
+	omp_set_num_threads(*nthreads);
 	//Rprintf("nthreads: %d, nthreads_o: %d\n",*nthreads,omp_get_max_threads());
 	//Rprintf("Initializing model...\n");
 	initialize_model(eps,l0_path,pb_path,exclude,penalty_factor,maxit,path_length,n_orderings,regress,scale,est,error,kl,approx,total_replicates,X, y, var_y, n, m,ordering_mat,&model);

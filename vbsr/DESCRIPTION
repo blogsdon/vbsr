@@ -5,7 +5,6 @@ Version: 0.0.6
 Date: 2014-06-05
 Author: Benjamin Logsdon
 Maintainer: Benjamin Logsdon <ben.logsdon@sagebase.org>
-Depends:
 Description: Efficient algorithm for solving ultra-sparse
 		regularized regression models using a variational
 		Bayes algorithm with a spike (l0) prior.  Algorithm
@@ -14,5 +13,6 @@ Description: Efficient algorithm for solving ultra-sparse
 		very general model diagnostics for controlling type-1
 		error included in this package.
 License: GPL-2
-Copyright: Benjamin Logsdon 2014
+Copyright: Benjamin Logsdon 2015
 Depends: R (>= 3.0.0)
+

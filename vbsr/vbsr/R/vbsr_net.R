@@ -1,22 +1,23 @@
-vbsr = function(y,
+vbsr_net = function(y,
 		X,
 		ordering_mat=NULL,
 		eps=1e-6,
+		path_length=200,
 		exclude=NULL,
 		add.intercept=TRUE,
 		maxit = 1e4,
 		n_orderings = 10,
-    family = "normal",
+		regress = "LINEAR",
 		scaling = TRUE,
 		return_kl = TRUE,
 		estimation_type = "BMA",
 		bma_approximation = TRUE,
 		screen = 1.0,
-		post=0.95,
-    already_screened = 1.0,
+		already_screened = 1.0,
+    		bonf_l0=TRUE,
 		kl = 0.99,
 		l0_path=NULL,
-    cleanSolution=FALSE){
+		n_threads=NULL){
 
 	n <- nrow(X);
 	m <- ncol(X);
@@ -24,15 +25,10 @@ vbsr = function(y,
 		X <- cbind(rep(1,n),X);
 		m <- m+1;
 	}
-	if(!is.null(post)){
-		path_length=1;
-		l0_path=-(qchisq(0.05/m,1,lower.tail=FALSE)-log(n)+2*log((1-post)/(post)));
-	}else{
-    path_length=length(l0_path)
-    if(path_length==0){
-      stop("invalid penalty parameter path specification")
-    }
-	}
+  if(bonf_l0){
+    path_length=1;
+    l0_path=-(qchisq(0.05/m,1,lower.tail=FALSE)-log(n)+2*log(0.05/0.95));
+  }
 	#n <- nrow(X);
 
 	#m <- ncol(X);
@@ -71,12 +67,12 @@ vbsr = function(y,
 
 	#maxit = 1e4;
 	#n_orderings = 10;
-	if(family == "normal"){
+	if(regress == "LINEAR"){
 		regress <- 1;
-	} else if (family == "binomial"){
+	} else if (regress == "LOGISTIC"){
 		regress <- 0;
 	} else {
-		stop("Improper type of regression provided. Must be either 'normal' or 'binomial'.");
+		stop("Improper type of regression provided. Must be either 'LINEAR' or 'LOGISTIC'.");
 	}
 	#regress = 0;
 
@@ -281,11 +277,11 @@ vbsr = function(y,
 			}
 		}
 	}
-	#if(!is.null(n_threads)){
-	#  nthreads=n_threads;
-	#}else{
-	  nthreads=1;
-	#}
+	if(!is.null(n_threads)){
+		nthreads=n_threads;
+	}else{
+		nthreads=1;
+	}
 	result <- c();
 	while(length(result)==0){
 		try(result<-.C("run_vbsr_wrapper",
@@ -517,66 +513,10 @@ vbsr = function(y,
 			result_list$kl_index <- b_list;
 
 		}
-	}
-  modUnique <- which(!duplicated(round(result_list$lb,-log10(eps)-1)));
-  lb1 <- result_list$lb[modUnique];
-  #print(result_list$lb);
-  modProb <- exp(lb1-max(lb1))/(sum(exp(lb1-max(lb1))));
-  
-  
-	if(!is.null(post)){
-    result_list2 <- list();
-		result_list2$beta <- result_list$e_beta[-wexc];
-    result_list2$alpha <- result_list$e_beta[wexc];
-    #result_list2$betaSE <- sqrt(result_list$e_beta[-wexc]^2+result_list$beta_p[-wexc]*(result_list$beta_mu[-wexc]^2+result_list$beta_sigma[-wexc]))
-		result_list2$z <- result_list$beta_chi[-wexc];
-    result_list2$pval <- pchisq(result_list2$z^2,1,lower.tail=FALSE);
-    result_list2$post <- result_list$beta_p[-wexc];
-    result_list2$l0 <- result_list$l0_path;
-    result_list2$modelEntropy <- -sum(modProb*log(modProb));
-    result_list2$modelProb <- modProb;
-    if(cleanSolution){
-      fastlm <- function(y,X){
-        n1 <- nrow(X)
-        X <- cbind(rep(1,n1),X);
-        ginv <- solve(t(X)%*%X);
-        Xhat <- ginv%*%t(X);
-        betahat <- Xhat%*%y;
-        sig <- mean((y-X%*%betahat)^2)*((n1)/(n1-ncol(X)));
-        zval <- betahat/sqrt(sig*diag(ginv));
-        return(zval[-1]);
-      }
-      signif <- result_list2$pval < 0.05/m;
-      #a1 <- fastlm(y,X[,-wexc][,signif])
-      #print(a1)
-      if(sum(signif)>1){
-        result_list2$z[signif] <- fastlm(y,X[,-wexc][,signif]);
-        #result_list2$pval[signif] <- pchisq(result_list2$z[signif]^2,1,lower.tail=FALSE);
-        result_list2$pval[signif] <- pt(abs(result_list2$z[signif]),nrow(X)-ncol(X[,-wexc][,signif])-1,lower.tail=FALSE)*2;
-      }
-    }
-    return(result_list2);
-	}else{
-    result_list2 <- list();
-    result_list2$beta <- result_list$e_beta[-wexc,];
-    result_list2$alpha <- result_list$e_beta[wexc,];
-    result_list2$z <- result_list$beta_chi[-wexc,];
-    result_list2$pval <- pchisq(result_list2$z^2,1,lower.tail=FALSE);
-    result_list2$post <- result_list$beta_p[-wexc,];
-    result_list2$l0 <- result_list$l0_path;
-    
-    result_list2$modelEntropy <- -sum(modProb*log(modProb));
-    result_list2$modelProb <- modProb;
-    if(!is.null(result_list$kl_index)){
-      result_list2$kl_index <- result_list$kl_index;
-    }
-    if(!is.null(result_list$kl)){
-      result_list2$kl <- result_list$kl;
-      result_list2$kl_min <- result_list$kl_min;
-      result_list2$kl_mean <- result_list$kl_mean;
-      result_list2$kl_se <- result_list$kl_se;
-    }
-        
-    return(result_list2)
-	}
+	}	
+  if(bonf_l0){
+    result_list$beta <- result_list$e_beta[-wexc];
+    result_list$z <- result_list$beta_chi[-wexc];
+  }
+	return(result_list);
 }
