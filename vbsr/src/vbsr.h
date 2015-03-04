@@ -6,7 +6,7 @@
 #include <Rmath.h>
 #include <stdio.h>
 #include <R_ext/BLAS.h>
-#include <omp.h>
+//#include <omp.h>
 
 //regressionType: the types of regression that are supported
 typedef enum {LINEAR, LOGISTIC} regressionType;
