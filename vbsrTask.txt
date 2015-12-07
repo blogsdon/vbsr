@@ -11,3 +11,10 @@
 7) Fill out all documentation DONE!
 8) Update vignette to include new functionality DONE!
 9) Run tests to make sure it passes all of the functionality metrics
+
+#########task list, December 7 2015
+1) implement an r version of the stochastic EM algorithm
+2) run diagnostic tests comparing to c algorithm
+3) implement an r version of variational Bayes algorithm
+4) run diagnostic tests comparing to c algorithm
+5) write a c version of stochastic EM algorithm
