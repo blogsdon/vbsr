@@ -1,8 +1,11 @@
-stochasticEMSpike <- function(y,x,z=NULL,pb,burnIn=1e3,capture=5e3,captureFreq=0.1){
+stochasticEMSpike <- function(y,x,z=NULL,l0,burnIn=1e3,capture=5e3,captureFreq=0.1,seed=1){
   ###y = outcomes
   ###x = design matrix
-  ###pb = prior probability of being non-zero
+  ###l0 = logit transfomred prior probability of being non-zero
   ###model <- list
+  
+  #seed default random seed to control behavior
+  set.seed(seed)
   
   #n: number of samples
   n <- nrow(x)
@@ -12,6 +15,17 @@ stochasticEMSpike <- function(y,x,z=NULL,pb,burnIn=1e3,capture=5e3,captureFreq=0
   
   #p: number of fixed covariates
   p <- ncol(z)
+  
+  
+  rSpikeSlab <- function(mu,sigma2,pb){
+    x <- rbinom(1,1,pb)
+    if(x==1){
+      y <- rnorm(1,mean = mu,sd = sqrt(sigma2))
+    }else{
+      y <- 0
+    }
+    return(y)
+  }
   
   #function to intialize the covariate matrix if it has not bee initialized
   initializeFixedCovariates <- function(z,n){
@@ -28,15 +42,6 @@ stochasticEMSpike <- function(y,x,z=NULL,pb,burnIn=1e3,capture=5e3,captureFreq=0
     #variable to track the state of beta
     modelState$beta <- rep(0,m)
     
-    #variable to track the state fo the beta mean estimate
-    modelState$betaMu <- rep(0,m)
-    
-    #variable to track the state of the beta variance estimates
-    modelState$betaSigma <- rep(0,m)
-    
-    #variable to track the state of the probability paremeter for the beta distributions
-    modelState$betaP <- rep(0,m)
-    
     #variable to track the state of the fixed effect estimates
     modelState$alpha <- rep(0,p)
     
@@ -47,7 +52,7 @@ stochasticEMSpike <- function(y,x,z=NULL,pb,burnIn=1e3,capture=5e3,captureFreq=0
     modelState$iteration <- 1
     
     #prior probability of being non-zero
-    modelState$pb <- pb
+    modelState$l0 <- l0
     
     #complete log likelihood
     modelState$logLikelihood <- 0
@@ -79,6 +84,12 @@ stochasticEMSpike <- function(y,x,z=NULL,pb,burnIn=1e3,capture=5e3,captureFreq=0
     #residual vector
     modelState$residuals <- y
     
+    #capture iteration
+    modelState$captureIteration <- 1
+    
+    #capture period
+    modelState$capturePeriod <- 1/captureFreq
+    
     #sum of squares
     modelState$xSumSquares <- apply(x^2,2,sum)
     
@@ -97,6 +108,8 @@ stochasticEMSpike <- function(y,x,z=NULL,pb,burnIn=1e3,capture=5e3,captureFreq=0
     #number of unpenalized variables
     modelState$p <- p
 
+    #zhat matrix
+    modelState$Zhat <- solve(t(Z)%*%Z)%*%t(Z)
     
     return(modelState)
   }
@@ -114,21 +127,59 @@ stochasticEMSpike <- function(y,x,z=NULL,pb,burnIn=1e3,capture=5e3,captureFreq=0
       #sigmaj
       sigmaj <- modelState$sigma/modelState$xSumSquares[j]
       
+      chi <- muj^2/sigmaj
+      
       #pj
       
+      pj <- 1/(1+exp(-0.5*(chi+modelState$l0+log(sigmaj))))
+      
       #betaj
+      betaj <- rSpikeSlab(muj,sigmaj,pj)
+
+      #update residuals
+      modelState$residuals <- modelState$residuals + modelState$x[,j]*(modelState$beta[j]-betaj)
+            
+
+      #set beta paramters
+      modelState$beta[j] <- betaj
+
+      
+      #if collect posterior distributions over betaj's      
+      if(modelState$iteration > modelState$burnIn 
+         & modelState$iteration%%modelState$capturePeriod==0){
+        modelState$betaCapture[modelState$captureIteration,j] <- betaj
+        modelState$betaMuCapture[modelState$captureIteration,j] <- muj
+        modelState$betaSigmaCapture[modelState$captureIteration,j] <- sigmaj
+        modelState$betaPCapture[modelState$captureIteration,j] <- pj
+        modelState$captureIteration <- modelState$captureIteration + 1
+      }
+      
     }
+    
+    #return the current model state
     return(modelState)
   }
   
   #function to update the alpha parameters
-  updateAlpha <- function(modelState){}
+  updateAlpha <- function(modelState){
+    #get new fixed parameter estimates
+    alpha <- modelState$Zhat%*%(modelState$residuals+modelState$z%*%modelState$alpha)
+    
+    #update residuals
+    modelState$residuals <- modelState$residuals + modelState$z%*%(modelState$alpha-alpha)
+    
+    #set model alpha to new alpha
+    modelState$alpha <- alpha
+    return(modelState)
+  }
   
   #function to update the error parameters
   updateError <- function(modelState){}
   
   #function to update the likelihood parameters
   updateLogLikelihood <- function(modelState){}
+  
+  
   
   while(modelState$iteration <= burnIn+capture){
     
