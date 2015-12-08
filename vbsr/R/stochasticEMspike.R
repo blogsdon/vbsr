@@ -22,7 +22,7 @@ stochasticEMSpike <- function(y,x,z=NULL,pb,burnIn=1e3,capture=5e3,captureFreq=0
   }
   
   #function to initialize the starting condition
-  initializeModelState <- function(m,p,pb,capture,captureFreq){
+  initializeModelState <- function(n,m,p,pb,capture,captureFreq,y,x){
     modelState <- list()
     
     #variable to track the state of beta
@@ -30,7 +30,6 @@ stochasticEMSpike <- function(y,x,z=NULL,pb,burnIn=1e3,capture=5e3,captureFreq=0
     
     #variable to track the state fo the beta mean estimate
     modelState$betaMu <- rep(0,m)
-    
     
     #variable to track the state of the beta variance estimates
     modelState$betaSigma <- rep(0,m)
@@ -77,11 +76,50 @@ stochasticEMSpike <- function(y,x,z=NULL,pb,burnIn=1e3,capture=5e3,captureFreq=0
     #sampled complete log likelihoods to store
     modelState$logLikelihoodCollect <- rep(0,nSamp)
     
+    #residual vector
+    modelState$residuals <- y
+    
+    #sum of squares
+    modelState$xSumSquares <- apply(x^2,2,sum)
+    
+    #y - outcome vector
+    modelState$y <- y
+    
+    #x - design matrix
+    modelState$x <- x
+    
+    #number of observations
+    modelState$n <- n
+    
+    #nubmer of penalized variables
+    modelState$m <- m
+    
+    #number of unpenalized variables
+    modelState$p <- p
+
+    
     return(modelState)
   }
   
   #function to update the beta parameters
-  updateBeta <- function(modelState){}
+  updateBeta <- function(modelState){
+    for (j in 1:modelState$m){
+      #muj - mean estimate
+      muj <- t(modelState$x[,j])%*%modelState$residuals
+      
+      muj <- muj + muj*modelState$xSumSquares[j]
+      
+      muj <- muj/modelState$xSumSquares[j]
+      
+      #sigmaj
+      sigmaj <- modelState$sigma/modelState$xSumSquares[j]
+      
+      #pj
+      
+      #betaj
+    }
+    return(modelState)
+  }
   
   #function to update the alpha parameters
   updateAlpha <- function(modelState){}
