@@ -1,4 +1,4 @@
-stochasticEMSpike <- function(y,x,z=NULL,l0,burnIn=1e3,capture=5e3,captureFreq=0.1,seed=1){
+stochasticEMSpike <- function(y,x,z=NULL,l0 = -1.545509,burnIn=1e3,capture=5e3,captureFreq=0.1,seed=1){
   ###y = outcomes
   ###x = design matrix
   ###l0 = logit transfomred prior probability of being non-zero
@@ -14,7 +14,7 @@ stochasticEMSpike <- function(y,x,z=NULL,l0,burnIn=1e3,capture=5e3,captureFreq=0
   m <- ncol(x)
   
   #p: number of fixed covariates
-  p <- ncol(z)
+  
   
   
   rSpikeSlab <- function(mu,sigma2,pb){
@@ -35,8 +35,12 @@ stochasticEMSpike <- function(y,x,z=NULL,l0,burnIn=1e3,capture=5e3,captureFreq=0
     return(z)
   }
   
+  z <- initializeFixedCovariates(z,n)
+  
+  p <- ncol(z)
+  
   #function to initialize the starting condition
-  initializeModelState <- function(n,m,p,l0,capture,captureFreq,y,x){
+  initializeModelState <- function(n,m,p,l0,capture,captureFreq,y,x,z){
     modelState <- list()
     
     #variable to track the state of beta
@@ -109,7 +113,7 @@ stochasticEMSpike <- function(y,x,z=NULL,l0,burnIn=1e3,capture=5e3,captureFreq=0
     modelState$p <- p
 
     #zhat matrix
-    modelState$Zhat <- solve(t(Z)%*%Z)%*%t(Z)
+    modelState$Zhat <- solve(t(z)%*%z)%*%t(z)
     
     return(modelState)
   }
@@ -215,7 +219,7 @@ stochasticEMSpike <- function(y,x,z=NULL,l0,burnIn=1e3,capture=5e3,captureFreq=0
   }
   
   
-  modelState <- initializeModelState(n,m,p,l0,capture,captureFreq,y,x)
+  modelState <- initializeModelState(n,m,p,l0,capture,captureFreq,y,x,z)
   
   while(modelState$iteration <= burnIn+capture){
     
