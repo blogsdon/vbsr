@@ -36,7 +36,7 @@ stochasticEMSpike <- function(y,x,z=NULL,l0,burnIn=1e3,capture=5e3,captureFreq=0
   }
   
   #function to initialize the starting condition
-  initializeModelState <- function(n,m,p,pb,capture,captureFreq,y,x){
+  initializeModelState <- function(n,m,p,l0,capture,captureFreq,y,x){
     modelState <- list()
     
     #variable to track the state of beta
@@ -151,7 +151,6 @@ stochasticEMSpike <- function(y,x,z=NULL,l0,burnIn=1e3,capture=5e3,captureFreq=0
         modelState$betaMuCapture[modelState$captureIteration,j] <- muj
         modelState$betaSigmaCapture[modelState$captureIteration,j] <- sigmaj
         modelState$betaPCapture[modelState$captureIteration,j] <- pj
-        modelState$captureIteration <- modelState$captureIteration + 1
       }
       
     }
@@ -170,16 +169,53 @@ stochasticEMSpike <- function(y,x,z=NULL,l0,burnIn=1e3,capture=5e3,captureFreq=0
     
     #set model alpha to new alpha
     modelState$alpha <- alpha
+
+    #capture the alpha distribution
+    if(modelState$iteration > modelState$burnIn 
+       & modelState$iteration%%modelState$capturePeriod==0){
+      modelState$alphaCapture[modelState$captureIteration,] <- alpha
+    }
+    
     return(modelState)
   }
   
   #function to update the error parameters
-  updateError <- function(modelState){}
+  updateError <- function(modelState){
+    #generate estimate of error variance
+    sigma <- sum(modelState$residuals^2)/modelState$n
+    
+    #set current state to new estimate
+    modelState$sigma <- sigma
+    
+    #capture the posterior distribution of sigma
+    if(modelState$iteration > modelState$burnIn 
+       & modelState$iteration%%modelState$capturePeriod==0){
+      modelState$sigmaCapture[modelState$captureIteration] <- sigma
+    }
+    
+    return(modelState)
+  }
   
   #function to update the likelihood parameters
-  updateLogLikelihood <- function(modelState){}
+  updateLogLikelihood <- function(modelState){
+    #temporarily going to use just the log likelihood instead of full log posterior
+    
+    logLikelihood <- -0.5*modelState$n*(log(2*pi*modelState$sigma)+1)
+    
+    modelState$logLikelihood <- logLikelihood
+    
+    if(modelState$iteration > modelState$burnIn
+       & modelState$iteration%%modelState$capturePeriod==0){
+      modelState$logLikelihoodCapture[modelState$catpureIteration] <- logLikelihood
+      #last update, update the capture iteration
+      modelState$captureIteration <- modelState$captureIteration + 1
+    }
+    
+    return(modelState)
+  }
   
   
+  modelState <- initializeModelState(n,m,p,l0,capture,captureFreq,y,x)
   
   while(modelState$iteration <= burnIn+capture){
     
