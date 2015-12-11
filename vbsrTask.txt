@@ -14,12 +14,12 @@
 
 #########task list, December 7 2015
 1) implement an r version of the stochastic EM algorithm (stochasticEMSpike.R)
-  a) write skeleton of function
-  b) write update beta function
-  c) write update alpha function
-  d) write update sigma funciton
-  e) write update log likelihood funciton
-  f) test all functions
+  a) write skeleton of function DONE
+  b) write update beta function DONE
+  c) write update alpha function DONE
+  d) write update sigma funciton DONE
+  e) write update log likelihood function DONE
+  f) test all functions DONE
   g) TeX derivations
 2) run diagnostic tests comparing to c algorithm
 3) implement an r version of variational Bayes algorithm

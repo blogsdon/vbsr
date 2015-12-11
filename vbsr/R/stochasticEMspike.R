@@ -40,7 +40,7 @@ stochasticEMSpike <- function(y,x,z=NULL,l0 = -1.545509,burnIn=1e3,capture=5e3,c
   p <- ncol(z)
   
   #function to initialize the starting condition
-  initializeModelState <- function(n,m,p,l0,capture,captureFreq,y,x,z){
+  initializeModelState <- function(n,m,p,l0,burnIn,capture,captureFreq,y,x,z){
     modelState <- list()
     
     #variable to track the state of beta
@@ -94,6 +94,9 @@ stochasticEMSpike <- function(y,x,z=NULL,l0 = -1.545509,burnIn=1e3,capture=5e3,c
     #capture period
     modelState$capturePeriod <- 1/captureFreq
     
+    #burnin
+    modelState$burnIn <- burnIn
+    
     #sum of squares
     modelState$xSumSquares <- apply(x^2,2,sum)
     
@@ -102,6 +105,9 @@ stochasticEMSpike <- function(y,x,z=NULL,l0 = -1.545509,burnIn=1e3,capture=5e3,c
     
     #x - design matrix
     modelState$x <- x
+    
+    #z - covariate matrix
+    modelState$z <- z
     
     #number of observations
     modelState$n <- n
@@ -124,7 +130,7 @@ stochasticEMSpike <- function(y,x,z=NULL,l0 = -1.545509,burnIn=1e3,capture=5e3,c
       #muj - mean estimate
       muj <- t(modelState$x[,j])%*%modelState$residuals
       
-      muj <- muj + muj*modelState$xSumSquares[j]
+      muj <- muj + modelState$beta[j]*modelState$xSumSquares[j]
       
       muj <- muj/modelState$xSumSquares[j]
       
@@ -151,10 +157,10 @@ stochasticEMSpike <- function(y,x,z=NULL,l0 = -1.545509,burnIn=1e3,capture=5e3,c
       #if collect posterior distributions over betaj's      
       if(modelState$iteration > modelState$burnIn 
          & modelState$iteration%%modelState$capturePeriod==0){
-        modelState$betaCapture[modelState$captureIteration,j] <- betaj
-        modelState$betaMuCapture[modelState$captureIteration,j] <- muj
-        modelState$betaSigmaCapture[modelState$captureIteration,j] <- sigmaj
-        modelState$betaPCapture[modelState$captureIteration,j] <- pj
+        modelState$betaCollect[modelState$captureIteration,j] <- betaj
+        modelState$betaMuCollect[modelState$captureIteration,j] <- muj
+        modelState$betaSigmaCollect[modelState$captureIteration,j] <- sigmaj
+        modelState$betaPCollect[modelState$captureIteration,j] <- pj
       }
       
     }
@@ -177,7 +183,7 @@ stochasticEMSpike <- function(y,x,z=NULL,l0 = -1.545509,burnIn=1e3,capture=5e3,c
     #capture the alpha distribution
     if(modelState$iteration > modelState$burnIn 
        & modelState$iteration%%modelState$capturePeriod==0){
-      modelState$alphaCapture[modelState$captureIteration,] <- alpha
+      modelState$alphaCollect[modelState$captureIteration,] <- alpha
     }
     
     return(modelState)
@@ -194,7 +200,7 @@ stochasticEMSpike <- function(y,x,z=NULL,l0 = -1.545509,burnIn=1e3,capture=5e3,c
     #capture the posterior distribution of sigma
     if(modelState$iteration > modelState$burnIn 
        & modelState$iteration%%modelState$capturePeriod==0){
-      modelState$sigmaCapture[modelState$captureIteration] <- sigma
+      modelState$sigmaCollect[modelState$captureIteration] <- sigma
     }
     
     return(modelState)
@@ -210,7 +216,7 @@ stochasticEMSpike <- function(y,x,z=NULL,l0 = -1.545509,burnIn=1e3,capture=5e3,c
     
     if(modelState$iteration > modelState$burnIn
        & modelState$iteration%%modelState$capturePeriod==0){
-      modelState$logLikelihoodCapture[modelState$catpureIteration] <- logLikelihood
+      modelState$logLikelihoodCollect[modelState$catpureIteration] <- logLikelihood
       #last update, update the capture iteration
       modelState$captureIteration <- modelState$captureIteration + 1
     }
@@ -219,7 +225,7 @@ stochasticEMSpike <- function(y,x,z=NULL,l0 = -1.545509,burnIn=1e3,capture=5e3,c
   }
   
   
-  modelState <- initializeModelState(n,m,p,l0,capture,captureFreq,y,x,z)
+  modelState <- initializeModelState(n,m,p,l0,burnIn,capture,captureFreq,y,x,z)
   
   while(modelState$iteration <= burnIn+capture){
     
@@ -237,6 +243,10 @@ stochasticEMSpike <- function(y,x,z=NULL,l0 = -1.545509,burnIn=1e3,capture=5e3,c
     
     #update the iteration
     modelState$iteration <- modelState$iteration + 1
+    
+    if(modelState$iteration%%10==0){
+      cat('iteration:',modelState$iteration,'\n')
+    }
   }
   
   return(modelState)
