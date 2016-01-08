@@ -11,3 +11,11 @@ Encoding: UTF-8
 
 RnwWeave: Sweave
 LaTeX: pdfLaTeX
+
+BuildType: Package
+PackageUseDevtools: Yes
+PackagePath: vbsr
+PackageInstallArgs: --no-multiarch --with-keep.source --no-manual --no-build-vignettes
+PackageBuildArgs: --no-manual --no-build-vignettes
+PackageBuildBinaryArgs: --no-manual --no-build-vignettes
+PackageCheckArgs: --no-manual --no-build-vignettes

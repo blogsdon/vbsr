@@ -337,14 +337,16 @@ vbsr = function(y,
 			stop("solution does not exist for any of path specified");
 		}
 	}
-
-	if(scale==1&&add.intercept==TRUE){
-		mult <- c(1,apply(X[,-1],2,sd)*sqrt((n-1)/n));
-	} else if (scale==1){
-		mult <- apply(X[,-1],2,sd)*sqrt((n-1)/n);
-	}else{
-		mult <- rep(1,m);
-	}
+	  
+ 	if(scale==1&&add.intercept==TRUE){
+ 		#mult <- c(1,apply(X[,-1],2,sd)*sqrt((n-1)/n));
+ 	  mult <- c(1,sqrt(apply(X[,-1]^2,2,sum)/(n-1)))
+ 	} else if (scale==1){
+ 		mult <- sqrt(apply(X[,-1]^2,2,sum)/(n-1))
+ 	}else{
+ 		mult <- rep(1,m);
+ 	}
+	  #mult <- rep(1,m)
 
 	if (screen==1){
 
