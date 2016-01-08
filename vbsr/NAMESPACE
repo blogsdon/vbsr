@@ -1,2 +1,2 @@
 useDynLib("vbsr")
-export(compute_KL,vbsr,stochasticEMSpike)
+export(compute_KL,vbsr)

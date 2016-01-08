@@ -205,8 +205,8 @@ void process_data(struct model_struct * model){
 	switch(model->control_param.scaleType){
 
 		case SCALE:
-			Rprintf("Scaling...\n");
-		  Rprintf("m: %d\n",model->data.m);
+			//Rprintf("Scaling...\n");
+		  //Rprintf("m: %d\n",model->data.m);
 			
 			for(j=0;j<model->data.m;j++){
 			  exc = model->control_param.exclude[j];

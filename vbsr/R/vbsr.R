@@ -170,7 +170,7 @@ vbsr = function(y,
 			beta_mu,
 			beta_sigma,
 			beta_p,
-			lb1,PACKAGE="spike");
+			lb1,PACKAGE="vbsr");
 	
 	wexc <- which(exclude==1);
 
@@ -318,7 +318,7 @@ vbsr = function(y,
 			as.double(lb_mat),
 			as.double(kl_mat),
 			as.integer(nthreads),
-			PACKAGE="spike"),silent=TRUE);
+			PACKAGE="vbsr"),silent=TRUE);
 		if(length(result)==0&&path_length>1){
 			#rm(result);
 			#gc();
@@ -338,14 +338,15 @@ vbsr = function(y,
 		}
 	}
 	  
-# 	if(scale==1&&add.intercept==TRUE){
-# 		mult <- c(1,apply(X[,-1],2,sd)*sqrt((n-1)/n));
-# 	} else if (scale==1){
-# 		mult <- apply(X[,-1],2,sd)*sqrt((n-1)/n);
-# 	}else{
-# 		mult <- rep(1,m);
-# 	}
-	  mult <- rep(1,m)
+ 	if(scale==1&&add.intercept==TRUE){
+ 		#mult <- c(1,apply(X[,-1],2,sd)*sqrt((n-1)/n));
+ 	  mult <- c(1,sqrt(apply(X[,-1]^2,2,sum)/(n-1)))
+ 	} else if (scale==1){
+ 		mult <- sqrt(apply(X[,-1]^2,2,sum)/(n-1))
+ 	}else{
+ 		mult <- rep(1,m);
+ 	}
+	  #mult <- rep(1,m)
 
 	if (screen==1){
 
@@ -556,7 +557,7 @@ vbsr = function(y,
         result_list2$pval[signif] <- pt(abs(result_list2$z[signif]),nrow(X)-ncol(X[,-wexc][,signif])-1,lower.tail=FALSE)*2;
       }
     }
-    return(result_list);
+    return(result_list2);
 	}else{
     result_list2 <- list();
     result_list2$beta <- result_list$e_beta[-wexc,];
@@ -578,6 +579,6 @@ vbsr = function(y,
       result_list2$kl_se <- result_list$kl_se;
     }
         
-    return(result_list)
+    return(result_list2)
 	}
 }
