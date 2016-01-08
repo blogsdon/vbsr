@@ -1,5 +1,5 @@
 //variational Bayes spike regression (vbsr) R package C library
-//Copyright 2013 Benjamin A Logsdon
+//Copyright 2015 Benjamin A Logsdon
 #include "vbsr.h"
 
 
@@ -131,11 +131,26 @@ void scale_vector(double * vec,double * ones,int n){
 	//mean zero, variance 1
 	double mean,sd;
 	double nd = (double) n;
+  //Rprintf("n: %d, nd: %g\n",n,nd);
 	ddot_w(n,vec,ones,&mean);
 	mean = mean/nd;
+	//if(fabs(mean)<1e-15){
+	//  mean=0;
+	//}
+  //Rprintf("mean: %g\n",mean);
+	//Rprintf("before mean, vec[1]: %g, vec[2]: %g\n",vec[0],vec[1]);
+	//mean=0;
 	daxpy_w(n,ones,vec,-mean);
+	//Rprintf("after mean, vec[1]: %g, vec[2]: %g\n",vec[0],vec[1]);
 	dnrm2_w(n,vec,&sd);
-	dscal_w(n,vec,sqrt(nd)/(sd));
+	sd = pow(sd,2);
+	nd = nd-1;
+	//Rprintf("sd: %.*e\n",16,sqrt(nd/sd));
+	sd=sqrt(nd/sd);
+	//sd=1;
+  //Rprintf("sd: %.*e\n",16,sd);
+	dscal_w(n,vec,sd);
+	//Rprintf("after scale, vec[1]: %g, vec[2]: %g\n",vec[0],vec[1]);
 }
 
 
@@ -185,18 +200,21 @@ double compute_ssq(double *vec,int n){
 
 void process_data(struct model_struct * model){
 	int j;
+  int exc;
 	double nd = ((double) model->data.n);
-
 	switch(model->control_param.scaleType){
 
 		case SCALE:
-			//Rprintf("Scaling...\n");
+			Rprintf("Scaling...\n");
+		  Rprintf("m: %d\n",model->data.m);
 			
 			for(j=0;j<model->data.m;j++){
-				if(j>0){
+			  exc = model->control_param.exclude[j];
+				if(exc==0){
 					scale_vector(xc(model,j),model->data.one_vec,model->data.n);
 				}
-				model->data.x_sum_sq[j] = nd;
+				model->data.x_sum_sq[j] = nd - 1;
+			  //model->data.x_sum_sq[j]=compute_ssq(xc(model,j),model->data.n);
 			}
 			break;
 
@@ -214,6 +232,7 @@ void process_data(struct model_struct * model){
 
 void process_data_marg(struct model_marg_struct * model){
 	int j;
+  int exc;
 	double nd = ((double) model->data.n);
 
 	switch(model->control_param.scaleType){
@@ -222,10 +241,11 @@ void process_data_marg(struct model_marg_struct * model){
 			//Rprintf("Scaling...\n");
 			
 			for(j=0;j<model->data.m;j++){
-				if(j>0){
+			  exc = model->control_param.exclude[j];
+				if(exc==0){
 					scale_vector(xcm(model,j),model->data.one_vec,model->data.n);
 				}
-				model->data.x_sum_sq[j] = nd;
+				model->data.x_sum_sq[j] = nd - 1;
 			}
 			break;
 
@@ -660,6 +680,7 @@ void update_beta(struct model_struct * model, int i, int j){
 				//Rprintf("exc: %d\n",exc);
 				ddot_w(model->data.n,xc(model,k),me(model,i,j)->resid_vec,&mu);
 				//Rprintf("mu: %g\n",mu);
+				//Rprintf("xumsq: %g, k: %d\n",model->data.x_sum_sq[k],k);
 				mu = mu + (model->data.x_sum_sq[k])*(me(model,i,j)->e_beta[k]);
 				//Rprintf("mu: %g\n",mu);
 				mu = mu/model->data.x_sum_sq[k];
@@ -680,16 +701,19 @@ void update_beta(struct model_struct * model, int i, int j){
 					//Rprintf("p: %g, e_b: %g, e_b2: %g\n",p,e_b,e_b2);					
 				}
 
-				me(model,i,j)->p_sums = me(model,i,j)->p_sums + p;
-				if(p>1-1e-10){
-					me(model,i,j)->entropy = me(model,i,j)->entropy - p*log(p) + (1-p) + 0.5*p*log(2*exp(1)*3.14159*sigma);
-				}else if(p<1e-10){
-					me(model,i,j)->entropy = me(model,i,j)->entropy + p - (1-p)*log(1-p) + 0.5*p*log(2*exp(1)*3.14159*sigma);					
-				} else {
-					me(model,i,j)->entropy = me(model,i,j)->entropy - p*log(p) - (1-p)*log(1-p) + 0.5*p*log(2*exp(1)*3.14159*sigma);
+
+				if(exc==0){
+				  me(model,i,j)->v_sums_correct = me(model,i,j)->v_sums_correct + (pow(e_b,2)-e_b2)*(model->data.x_sum_sq[k]);
+				  me(model,i,j)->p_sums = me(model,i,j)->p_sums + p;
+				  if(p>1-1e-10){
+				    me(model,i,j)->entropy = me(model,i,j)->entropy - p*log(p) + (1-p) + 0.5*p*log(2*exp(1)*M_PI*sigma);
+				  }else if(p<1e-10){
+				    me(model,i,j)->entropy = me(model,i,j)->entropy + p - (1-p)*log(1-p) + 0.5*p*log(2*exp(1)*M_PI*sigma);					
+				  } else {
+				    me(model,i,j)->entropy = me(model,i,j)->entropy - p*log(p) - (1-p)*log(1-p) + 0.5*p*log(2*exp(1)*M_PI*sigma);
+				  }
 				}
-				me(model,i,j)->v_sums_correct = me(model,i,j)->v_sums_correct + (pow(e_b,2)-e_b2)*(model->data.x_sum_sq[k]);
-					
+				
 				daxpy_w(model->data.n,xc(model,k),me(model,i,j)->resid_vec,me(model,i,j)->e_beta[k]-e_b);
 
 				me(model,i,j)->beta_mu[k] = mu;
@@ -740,11 +764,11 @@ void update_beta(struct model_struct * model, int i, int j){
 
 				me(model,i,j)->p_sums = me(model,i,j)->p_sums + p;
 				if(p>1-1e-10){
-					me(model,i,j)->entropy = me(model,i,j)->entropy - p*log(p) + (1-p) + 0.5*p*log(2*exp(1)*3.14159*sigma);
+					me(model,i,j)->entropy = me(model,i,j)->entropy - p*log(p) + (1-p) + 0.5*p*log(2*exp(1)*M_PI*sigma);
 				}else if(p<1e-10){
-					me(model,i,j)->entropy = me(model,i,j)->entropy + p - (1-p)*log(1-p) + 0.5*p*log(2*exp(1)*3.14159*sigma);					
+					me(model,i,j)->entropy = me(model,i,j)->entropy + p - (1-p)*log(1-p) + 0.5*p*log(2*exp(1)*M_PI*sigma);					
 				} else {
-					me(model,i,j)->entropy = me(model,i,j)->entropy - p*log(p) - (1-p)*log(1-p) + 0.5*p*log(2*exp(1)*3.14159*sigma);
+					me(model,i,j)->entropy = me(model,i,j)->entropy - p*log(p) - (1-p)*log(1-p) + 0.5*p*log(2*exp(1)*M_PI*sigma);
 				}
 				//me(model,i,j)->v_sums_correct = me(model,i,j)->v_sums_correct + (pow(e_b,2)-e_b2)*(model->data.x_sum_sq[k]);
 					
@@ -903,10 +927,15 @@ void update_error(struct model_struct * model, int i, int j){
 		case LINEAR:
 
 			ddot_w(model->data.n,me(model,i,j)->resid_vec,me(model,i,j)->resid_vec,&U);
+		  //Rprintf("U pre correction: %g\n",U);
 			U = U - me(model,i,j)->v_sums_correct;
+		  //Rprintf("U post correction: %g, correction factor: %g\n",U, me(model,i,j)->v_sums_correct);
+		  
 			U = U/nd;
-			//me(model,i,j)->sigma_e = U;
-      me(model,i,j)->sigma_e = 1.0;
+		  //Rprintf("U post division: %g\n",U);
+			me(model,i,j)->sigma_e = U;
+		  //Rprintf("sigma_e: %g\n",me(model,i,j)->sigma_e);
+      //me(model,i,j)->sigma_e = 1.0;
                         //Rprintf("no segfault\n");
 			if(!R_FINITE(U)){
 				free_model(model);
@@ -1001,11 +1030,11 @@ void update_error_marg(struct model_marg_struct * model){
 
 void update_lb(struct model_struct * model, int i, int j){
 
-
-
 	double lba;
 	double nd = (double) model->data.n;
 	double md = (double) model->data.m;
+	double pd = (double) model->data.p;
+	md = md - pd;
 	double p_beta;
 	//if(model->control_param.max_pb==1){
 	//	p_beta = me(model,i,j)->p_max;
@@ -1020,11 +1049,15 @@ void update_lb(struct model_struct * model, int i, int j){
 		case LINEAR:
       ddot_w(model->data.n,me(model,i,j)->resid_vec,me(model,i,j)->resid_vec,&U);
 			U = U - me(model,i,j)->v_sums_correct;
-
-			lba = -0.5*nd*(log(2*3.14159*me(model,i,j)->sigma_e)+(U/nd));
+      //Rprintf("here\n");
+			lba = -0.5*nd*(log(2*M_PI*me(model,i,j)->sigma_e) + 1);
+			//Rprintf("lba: %g\n",lba);
 			lba = lba + log(p_beta)*(me(model,i,j)->p_sums);
+			//Rprintf("lba: %g\n",md);
 			lba = lba + log(1-p_beta)*(md - me(model,i,j)->p_sums);
+			//Rprintf("lba: %g\n",lba);
 			lba = lba + me(model,i,j)->entropy;
+			//Rprintf("lba: %g\n",lba);
 			//Rprintf("Entropy: %g\n",me(model,i,j)->entropy);
 			me(model,i,j)->lb = lba;
 
@@ -1121,6 +1154,7 @@ void run_vbsr(struct model_struct * model){
 				//	update_p_beta(model,i,j);
 				//}
 				//Rprintf("Updating error...\n");
+				//Rprintf("entropy: %g\n",me(model,i,j)->entropy);
 				update_error(model,i,j);
 				//Rprintf("Updating lower bound...\n");
 				update_lb(model,i,j);
