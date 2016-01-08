@@ -20,7 +20,7 @@
   d) write update sigma funciton DONE
   e) write update log likelihood function DONE
   f) test all functions DONE
-  g) TeX derivations
+  g) Write up TeX derivations
 2) run diagnostic tests comparing to c algorithm
 3) implement an r version of variational Bayes algorithm
 4) run diagnostic tests comparing to c algorithm
